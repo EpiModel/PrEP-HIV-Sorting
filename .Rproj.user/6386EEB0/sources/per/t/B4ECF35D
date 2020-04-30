@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1588257895933.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1216142323",
+    "id" : "B4ECF35D",
+    "lastKnownWriteTime" : 1588282443,
+    "last_content_update" : 1588282443005,
+    "path" : "~/GitHub/PrEP-HIV-Sorting/Table1.R",
+    "project_path" : "Table1.R",
+    "properties" : {
+        "cursorPosition" : "0,0",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1588257882471.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "90279645",
+    "id" : "B8D8425B",
+    "lastKnownWriteTime" : 1588023750,
+    "last_content_update" : 1588023750,
+    "path" : "~/GitHub/PrEP-HIV-Sorting/Data cleaning.R",
+    "project_path" : "Data cleaning.R",
+    "properties" : {
+        "cursorPosition" : "4,16",
+        "docOutlineVisible" : "0",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
