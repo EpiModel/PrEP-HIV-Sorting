@@ -1,6 +1,6 @@
 source('~/GitHub/PrEP-HIV-Sorting/Data cleaning.R')
 
-#### Table 3a - Partnership pairings with NO UNKNOWN ####
+#### Table 3a - HIV mixing with NO UNKNOWN ####
 
 a <- artnetLong %>% count(hiv3)  #HIV among egos
 b <- artnetLong %>% count(d_hiv) #HIV by dyad pair
@@ -32,7 +32,7 @@ table3a.colnames <- c("Egos", "Total N", "%", "Negative n", "%", "Positive n", "
 table3a <- rbind(table3a.title, table3a.colnames,
                  cbind(totalHIV.ego.known, d.neg.part.known, d.pos.part.known))
 
-write.csv(table3a, file = "aim1_table3a .csv")
+write.csv(table3a, file = "aim1_table3a.csv")
 
 #### Table 3b - Partnership pairings with NO UNKNOWN, stratified by partnership type ####
 

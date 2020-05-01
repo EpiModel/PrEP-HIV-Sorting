@@ -1,6 +1,6 @@
 source('~/GitHub/PrEP-HIV-Sorting/Data cleaning.R')
 
-#### Table 2a - Partnership pairings with unknown values ####
+#### Table 2a - HIV mixing with unknown values ####
 
 a <- artnetLong %>% count(hiv3)  #HIV among egos
 b <- artnetLong %>% count(d_hiv) #HIV by dyad pair

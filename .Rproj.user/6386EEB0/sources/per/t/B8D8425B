@@ -5,16 +5,16 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "90279645",
+    "hash" : "1391100940",
     "id" : "B8D8425B",
-    "lastKnownWriteTime" : 1588023750,
-    "last_content_update" : 1588023750,
+    "lastKnownWriteTime" : 1588369985,
+    "last_content_update" : 1588369985496,
     "path" : "~/GitHub/PrEP-HIV-Sorting/Data cleaning.R",
     "project_path" : "Data cleaning.R",
     "properties" : {
-        "cursorPosition" : "4,16",
+        "cursorPosition" : "167,0",
         "docOutlineVisible" : "0",
-        "scrollLine" : "0"
+        "scrollLine" : "152"
     },
     "read_only" : false,
     "read_only_alternatives" : [
