@@ -1,0 +1,6 @@
+,V1,V2,V3,V4,V5,V6,V7
+table5a.title,"HIV-PrEP Sorting, no missing",Alters,,,,,
+table5a.colnames,Egos,No PrEP n,%,PrEP n,%,HIV+ n,%
+,No PrEP,2575,74,708,20,185,5
+,PrEP,485,36,678,50,199,15
+,HIV+,189,26,175,24,367,50

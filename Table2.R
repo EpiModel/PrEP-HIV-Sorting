@@ -35,7 +35,7 @@ d.unk.part <- cbind(cbind(c(b$n[3], b$n[6], b$n[9], c$n[3])),
                                 (100 * b$n[9] / a$n[3]),
                                 (100 * c$n[3] / sum(c$n)))))
 
-table2a.title <- c("All Partners", "", "", "Alters", "", "", "", "", "")
+table2a.title <- c("", "All Partners", "", "Alters", "", "", "", "", "")
 table2a.colnames <- c("Egos", "Total N", "%", "Negative n", "%", "Positive n", "%", "Unknown n", "%")
 
 table2a <- rbind(table2a.title, table2a.colnames,

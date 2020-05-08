@@ -1,0 +1,14 @@
+,V1,V2,V3,V4,V5
+table6b.title,"PrEP Sorting among HIV (-), stratified by partnership type",,,,
+table6b.title.main,Main Partnerships,Alters,,,
+table6b.colnames,Egos,No PrEP n,%,PrEP n,%
+,No PrEP,1092,92,97,8
+,PrEP,145,51,142,49
+table6b.title.casual,Casual Partnerships,Alters,,,
+table6b.colnames,Egos,No PrEP n,%,PrEP n,%
+,No PrEP,928,74,319,26
+,PrEP,243,44,315,56
+table6b.title.oneoff,One-off Partnerships,Alters,,,
+table6b.colnames,Egos,No PrEP n,%,PrEP n,%
+,No PrEP,555,66,292,34
+,PrEP,97,31,221,69

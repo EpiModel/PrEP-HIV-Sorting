@@ -5,14 +5,14 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "1504091290",
+    "hash" : "4169365515",
     "id" : "29CDE38B",
-    "lastKnownWriteTime" : 1588363986,
-    "last_content_update" : 1588363986740,
+    "lastKnownWriteTime" : 1588887478,
+    "last_content_update" : 1588887478451,
     "path" : "~/GitHub/PrEP-HIV-Sorting/Table2.R",
     "project_path" : "Table2.R",
     "properties" : {
-        "cursorPosition" : "3,0",
+        "cursorPosition" : "154,0",
         "docOutlineVisible" : "1",
         "scrollLine" : "0"
     },

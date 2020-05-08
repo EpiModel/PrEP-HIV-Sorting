@@ -1,0 +1,7 @@
+,V1,V2,V3,V4,V5,V6,V7,V8,V9,V10,V11
+table4a.title,HIV-PrEP Sorting,Alters,,,,,,,,,
+table4a.colnames,Egos,No PrEP n,%,PrEP n,%,PrEP Unknown n,%,HIV+ n,%,HIV? n,%
+,No PrEP,2575,30,708,8,2564,30,185,2,2427,29
+,PrEP,485,17,678,23,833,28,199,7,735,25
+,HIV+,189,13,175,12,216,15,367,25,518,35
+,HIV?,411,21,106,6,506,26,33,2,863,45

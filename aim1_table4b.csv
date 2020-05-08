@@ -1,0 +1,20 @@
+,V1,V2,V3,V4,V5,V6,V7,V8,V9,V10,V11
+table4b.title,"HIV-PrEP Sorting, stratified by partnership type",,,,,,,,,,
+table4b.title.main,Main Partnerships,Alters,,,,,,,,,
+table4b.colnames,Egos,No PrEP n,%,PrEP n,%,PrEP Unknown n,%,HIV+ n,%,HIV? n,%
+,No PrEP,1092,75,97,7,121,8,51,4,89,6
+,PrEP,145,39,142,38,25,7,44,12,19,5
+,HIV+,63,26,55,23,12,5,95,39,16,7
+,HIV?,179,52,14,4,34,10,10,3,110,32
+table4b.title.casual,Casual Partnerships,Alters,,,,,,,,,
+table4b.colnames,Egos,No PrEP n,%,PrEP n,%,PrEP Unknown n,%,HIV+ n,%,HIV? n,%
+,No PrEP,928,31,319,11,1020,34,74,2,641,21
+,PrEP,243,20,315,26,373,30,104,8,195,16
+,HIV+,90,14,75,11,111,17,175,27,209,32
+,HIV?,113,20,45,8,150,26,11,2,248,44
+table4b.title.oneoff,One-off Partnerships,Alters,,,,,,,,,
+table4b.colnames,Egos,No PrEP n,%,PrEP n,%,PrEP Unknown n,%,HIV+ n,%,HIV? n,%
+,No PrEP,555,14,292,7,1423,35,60,1,1697,42
+,PrEP,97,7,221,17,435,33,51,4,521,39
+,HIV+,36,6,45,8,93,16,97,17,293,52
+,HIV?,119,12,47,5,322,32,12,1,505,50
