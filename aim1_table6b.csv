@@ -1,14 +1,14 @@
-,V1,V2,V3,V4,V5
-table6b.title,"PrEP Sorting among HIV (-), stratified by partnership type",,,,
-table6b.title.main,Main Partnerships,Alters,,,
-table6b.colnames,Egos,No PrEP n,%,PrEP n,%
-,No PrEP,1092,92,97,8
-,PrEP,145,51,142,49
-table6b.title.casual,Casual Partnerships,Alters,,,
-table6b.colnames,Egos,No PrEP n,%,PrEP n,%
-,No PrEP,928,74,319,26
-,PrEP,243,44,315,56
-table6b.title.oneoff,One-off Partnerships,Alters,,,
-table6b.colnames,Egos,No PrEP n,%,PrEP n,%
-,No PrEP,555,66,292,34
-,PrEP,97,31,221,69
+"","V1","V2","V3","V4","V5"
+"table6b.title","PrEP Sorting among HIV (-), stratified by partnership type","","","",""
+"table6b.title.main","Main Partnerships","Alters","","",""
+"table6b.colnames","Egos","No PrEP n","%","PrEP n","%"
+"","No PrEP","1092","91.8418839360807","97","8.15811606391926"
+"","PrEP","145","50.5226480836237","142","49.4773519163763"
+"table6b.title.casual","Casual Partnerships","Alters","","",""
+"table6b.colnames","Egos","No PrEP n","%","PrEP n","%"
+"","No PrEP","928","74.4186046511628","319","25.5813953488372"
+"","PrEP","243","43.5483870967742","315","56.4516129032258"
+"table6b.title.oneoff","One-off Partnerships","Alters","","",""
+"table6b.colnames","Egos","No PrEP n","%","PrEP n","%"
+"","No PrEP","555","65.5253837072019","292","34.4746162927981"
+"","PrEP","97","30.5031446540881","221","69.496855345912"

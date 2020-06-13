@@ -1,16 +1,17 @@
-"HIV Serosorting, conditional on reporting Negative or Positive stratified by partnership type, crude ARTnet data",,,,,,
-Main Partnerships,,,Alters,,,
-Egos,Total N,%,Negative n,%,Positive n,%
-Negative,1902,89,1793,94,109,6
-Positive,225,11,130,58,95,42
-Total,2127,100,1923,90,204,10
-Casual Partnerships,,,Alters,,,
-Egos,Total N,%,Negative n,%,Positive n,%
-Negative,3799,89,3600,95,199,5
-Positive,452,11,277,61,175,39
-Total,4251,100,3877,91,374,9
-One-off Partnerships,,,Alters,,,
-Egos,Total N,%,Negative n,%,Positive n,%
-Negative,3483,93,3359,96,124,4
-Positive,271,7,174,64,97,36
-Total,3754,100,3533,94,221,6
+"","V1","V2","V3","V4","V5","V6","V7"
+"table3b.title","HIV Serosorting, conditional on reporting Negative or Positive stratified by partnership type, crude ARTnet data","","","","","",""
+"table3b.title.main","Main Partnerships","","","Alters","","",""
+"table3b.colnames","Egos","Total N","%","Negative n","%","Positive n","%"
+"","Negative","1902","89.4217207334274","1793","94.2691903259727","109","5.73080967402734"
+"","Positive","225","10.5782792665726","130","57.7777777777778","95","42.2222222222222"
+"","Total","2127","100","1923","90.4090267983075","204","9.59097320169252"
+"table3b.title.casual","Casual Partnerships","","","Alters","","",""
+"table3b.colnames","Egos","Total N","%","Negative n","%","Positive n","%"
+"","Negative","3799","89.3672077158316","3600","94.7617794156357","199","5.23822058436431"
+"","Positive","452","10.6327922841684","277","61.283185840708","175","38.716814159292"
+"","Total","4251","100","3877","91.2020701011527","374","8.79792989884733"
+"table3b.title.oneoff","One-off Partnerships","","","Alters","","",""
+"table3b.colnames","Egos","Total N","%","Negative n","%","Positive n","%"
+"","Negative","3483","92.7810335641982","3359","96.4398507034166","124","3.5601492965834"
+"","Positive","271","7.21896643580181","174","64.2066420664207","97","35.7933579335793"
+"","Total","3754","100","3533","94.1129461907299","221","5.88705380927011"

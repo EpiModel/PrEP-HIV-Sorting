@@ -15,6 +15,14 @@ artnet$age.cat[artnet$age >= 45 & artnet$age <= 54] <- "45-54"
 artnet$age.cat[artnet$age >= 55 & artnet$age <= 65] <- "55-65"
 artnet$age.cat[artnet$age > 65] <- "66+"
 
+artnetLong$age.cat <- rep(NA, nrow(artnetLong))
+artnetLong$age.cat[artnetLong$age >= 15 & artnetLong$age <= 24] <- "15-24"
+artnetLong$age.cat[artnetLong$age >= 25 & artnetLong$age <= 34] <- "25-34"
+artnetLong$age.cat[artnetLong$age >= 35 & artnetLong$age <= 44] <- "35-44"
+artnetLong$age.cat[artnetLong$age >= 45 & artnetLong$age <= 54] <- "45-54"
+artnetLong$age.cat[artnetLong$age >= 55 & artnetLong$age <= 65] <- "55-65"
+artnetLong$age.cat[artnetLong$age > 65] <- "66+"
+
 # Education
 artnet$education <- rep(NA, nrow(artnet))
 artnet$education[artnet$HLEDUCAT %in% c(0, 1, 2)] <- "Less than High School"
@@ -23,7 +31,7 @@ artnet$education[artnet$HLEDUCAT == 4] <- "Some College or Associates/Technical"
 artnet$education[artnet$HLEDUCAT == 5] <- "College or Greater"
 
 
-### Partners
+### Long Data Set
 
 # Age --- using imputed age
 # Check on what imputed age is & whether this is most appropriate option
@@ -46,7 +54,8 @@ p1.vars <- select(artnet, AMIS_ID,
                   prep.ever.ego = PREP_REVISED,
                   prep.during.ego = PART1PREPUSE, 
                   prep.during.ego.start = PART1PREPSTART, 
-                  prep.during.part = PART1PREPUSE_PART) %>%
+                  prep.during.part = PART1PREPUSE_PART,
+                  part_hiv = PART1HIV) %>%
         mutate(PARTNER_ID = 1)
         
 p2.vars <- select(artnet, AMIS_ID, 
@@ -54,7 +63,8 @@ p2.vars <- select(artnet, AMIS_ID,
                   prep.ever.ego = PREP_REVISED,
                   prep.during.ego = PART2PREPUSE, 
                   prep.during.ego.start = PART2PREPSTART, 
-                  prep.during.part = PART2PREPUSE_PART) %>%
+                  prep.during.part = PART2PREPUSE_PART,
+                  part_hiv = PART2HIV) %>%
         mutate(PARTNER_ID = 2)
 
 p3.vars <- select(artnet, AMIS_ID, 
@@ -62,7 +72,8 @@ p3.vars <- select(artnet, AMIS_ID,
                   prep.ever.ego = PREP_REVISED,
                   prep.during.ego = PART3PREPUSE, 
                   prep.during.ego.start = PART3PREPSTART, 
-                  prep.during.part = PART3PREPUSE_PART) %>%
+                  prep.during.part = PART3PREPUSE_PART,
+                  part_hiv = PART3HIV) %>%
         mutate(PARTNER_ID = 3)
 
 p4.vars <- select(artnet, AMIS_ID, 
@@ -70,7 +81,8 @@ p4.vars <- select(artnet, AMIS_ID,
                   prep.ever.ego = PREP_REVISED,
                   prep.during.ego = PART4PREPUSE, 
                   prep.during.ego.start = PART4PREPSTART, 
-                  prep.during.part = PART4PREPUSE_PART) %>%
+                  prep.during.part = PART4PREPUSE_PART,
+                  part_hiv = PART4HIV) %>%
         mutate(PARTNER_ID = 4)
 
 p5.vars <- select(artnet, AMIS_ID, 
@@ -78,7 +90,8 @@ p5.vars <- select(artnet, AMIS_ID,
                   prep.ever.ego = PREP_REVISED,
                   prep.during.ego = PART5PREPUSE, 
                   prep.during.ego.start = PART5PREPSTART, 
-                  prep.during.part = PART5PREPUSE_PART) %>%
+                  prep.during.part = PART5PREPUSE_PART,
+                  part_hiv = PART5HIV) %>%
         mutate(PARTNER_ID = 5)
 
 # Combining all of the datasets
@@ -93,14 +106,34 @@ pall.vars$ONCE <- NULL
 # Adding the new partner variables to artnetLong
 artnetLong <- inner_join(artnetLong, pall.vars, by = c("AMIS_ID", "PARTNER_ID"))
 
-# Recoding Never PrEP as Never During Partnership (was NA)
-artnetLong$prep.during.ego[artnetLong$prep.ever.ego == 0] <- 3
+### Cleaning the crude variables
 
-# Recoding 88 & 99 as NA
-artnetLong$prep.during.ego[which(artnetLong$prep.during.ego %in% c(88, 99))] <- NA
-artnetLong$prep.during.part[artnetLong$prep.during.part == 99] <- NA
-artnetLong$prep.during.ego.start[which(artnetLong$prep.during.ego.start %in% c(88, 99))] <- NA
+## Partners' HIV
+artnetLong$p_hiv[which(is.na(artnetLong$p_hiv))] <- 2 #  Recoding unknown (NA) partners' hiv as unknown (2)
 
+## Egos' PrEP
+# Having trouble with the following line, so I just initialized all values to 2 and then recoded accoridngly
+# Can't change the NA values for only HIV == 0
+# artnetLong$prep.during.ego2[artnetLong$hiv3 == 0 & is.na(artnetLong$prep.during.ego)] <- 2
+artnetLong$prep.during.ego2 <- rep(2, nrow(artnetLong))
+artnetLong$prep.during.ego2[artnetLong$prep.ever.ego == 0] <- 0 # Recoding Never PrEP as Never During Partnership (was NA)
+artnetLong$prep.during.ego2[artnetLong$prep.during.ego == 3] <- 0 # No PrEP during
+artnetLong$prep.during.ego2[which(artnetLong$prep.during.ego %in% c(1,2))] <- 1 # Always or Sometimes PrEP
+artnetLong$prep.during.ego2[which(artnetLong$prep.during.ego %in% c(88, 99))] <- 2 # Unknown
+
+artnetLong$prep.during.ego2[artnetLong$hiv3 == 1] <- NA # Setting back to NA for HIV-positive
+artnetLong$prep.during.ego2[artnetLong$hiv3 == 2] <- NA # Setting back to NA for HIV-unknown
+artnetLong$prep.during.ego2[artnetLong$hiv3 == 2 & artnetLong$prep.ever.ego == 0] <- 0 # Unknown HIV but Never used PrEP
+artnetLong$prep.during.ego2[artnetLong$hiv3 == 2 & artnetLong$prep.ever.ego == 1] <- 2 # Unknown HIV but HAVE used PrEP before
+
+## Partners' PrEP
+# Same issue as above so starting out by initializing all as 2
+artnetLong$prep.during.part2 <- rep(2, nrow(artnetLong))
+artnetLong$prep.during.part2[artnetLong$prep.during.part == 3] <- 0 # No PrEP during
+artnetLong$prep.during.part2[which(artnetLong$prep.during.part %in% c(1,2))] <- 1 # Always or Sometimes PrEP
+artnetLong$prep.during.part2[which(artnetLong$prep.during.part %in% c(88, 99))] <- 2 # Unknown
+
+artnetLong$prep.during.part2[artnetLong$p_hiv == 1] <- NA # Setting back to NA for HIV-positive
 
 #### Dyads
 
@@ -125,76 +158,76 @@ artnetLong$d_hivprep <- NULL
 ## Ego == (-) no PrEP
         # Partner == (-) no PrEP
         artnetLong$d_hivprep[artnetLong$hiv3 == 0 & 
-                                     artnetLong$prep.during.ego == 3 & 
+                                     artnetLong$prep.during.ego2 == 0 & 
                                      artnetLong$p_hiv == 0 & 
-                                     artnetLong$prep.during.part == 3] <- "NOP-NOP"
+                                     artnetLong$prep.during.part2 == 0] <- "NOP-NOP"
         
         # Partner == (-) PrEP
         artnetLong$d_hivprep[artnetLong$hiv3 == 0 & 
-                                     artnetLong$prep.during.ego == 3 &
+                                     artnetLong$prep.during.ego2 == 0 &
                                      artnetLong$p_hiv == 0 & 
-                                     artnetLong$prep.during.part %in% c(1, 2)] <- "NOP-YEP"
+                                     artnetLong$prep.during.part2 == 1] <- "NOP-YEP"
         
         # Partner == (-) PrEP UNK
         artnetLong$d_hivprep[artnetLong$hiv3 == 0 & 
-                                     artnetLong$prep.during.ego == 3 & 
+                                     artnetLong$prep.during.ego2 == 0 & 
                                      artnetLong$p_hiv == 0 & 
-                                     artnetLong$prep.during.part == 88] <- "NOP-PUK"
+                                     artnetLong$prep.during.part2 == 2] <- "NOP-PUK"
         
         # Partner == (+)
         artnetLong$d_hivprep[artnetLong$hiv3 == 0 & 
-                                     artnetLong$prep.during.ego == 3 & 
+                                     artnetLong$prep.during.ego2 == 0 & 
                                      artnetLong$p_hiv == 1] <- "NOP-POS"
         
         # Partner == (?)
         artnetLong$d_hivprep[artnetLong$hiv3 == 0 & 
-                                     artnetLong$prep.during.ego == 3 & 
+                                     artnetLong$prep.during.ego2 == 0 & 
                                      artnetLong$p_hiv == 2] <- "NOP-UNK"
 
 ## Ego == (-) PrEP
         # Partner == (-) no PrEP
         artnetLong$d_hivprep[artnetLong$hiv3 == 0 & 
-                                     artnetLong$prep.during.ego %in% c(1, 2) & 
+                                     artnetLong$prep.during.ego2 == 1 & 
                                      artnetLong$p_hiv == 0 & 
-                                     artnetLong$prep.during.part == 3] <- "YEP-NOP"
+                                     artnetLong$prep.during.part2 == 0] <- "YEP-NOP"
         
         # Partner == (-) PrEP
         artnetLong$d_hivprep[artnetLong$hiv3 == 0 & 
-                                     artnetLong$prep.during.ego %in% c(1, 2) &
+                                     artnetLong$prep.during.ego2 == 1 &
                                      artnetLong$p_hiv == 0 & 
-                                     artnetLong$prep.during.part %in% c(1, 2)] <- "YEP-YEP"
+                                     artnetLong$prep.during.part2 == 1] <- "YEP-YEP"
         
         # Partner == (-) PrEP UNK
         artnetLong$d_hivprep[artnetLong$hiv3 == 0 & 
-                                     artnetLong$prep.during.ego %in% c(1, 2) & 
+                                     artnetLong$prep.during.ego2 == 1 & 
                                      artnetLong$p_hiv == 0 & 
-                                     artnetLong$prep.during.part == 88] <- "YEP-PUK"
+                                     artnetLong$prep.during.part2 == 2] <- "YEP-PUK"
         
         # Partner == (+)
         artnetLong$d_hivprep[artnetLong$hiv3 == 0 & 
-                                     artnetLong$prep.during.ego %in% c(1, 2) & 
+                                     artnetLong$prep.during.ego2 == 1 & 
                                      artnetLong$p_hiv == 1] <- "YEP-POS"
         
         # Partner == (?)
         artnetLong$d_hivprep[artnetLong$hiv3 == 0 & 
-                                     artnetLong$prep.during.ego %in% c(1, 2) & 
+                                     artnetLong$prep.during.ego2 == 1 & 
                                      artnetLong$p_hiv == 2] <- "YEP-UNK"
 
 ## Ego == (+)
         # Partner == (-) no PrEP
         artnetLong$d_hivprep[artnetLong$hiv3 == 1 & 
                                      artnetLong$p_hiv == 0 & 
-                                     artnetLong$prep.during.part == 3] <- "POS-NOP"
+                                     artnetLong$prep.during.part2 == 0] <- "POS-NOP"
         
         # Partner == (-) PrEP
         artnetLong$d_hivprep[artnetLong$hiv3 == 1 & 
                                      artnetLong$p_hiv == 0 & 
-                                     artnetLong$prep.during.part %in% c(1, 2)] <- "POS-YEP"
+                                     artnetLong$prep.during.part2 == 1] <- "POS-YEP"
         
         # Partner == (-) PrEP UNK
         artnetLong$d_hivprep[artnetLong$hiv3 == 1 & 
                                      artnetLong$p_hiv == 0 & 
-                                     artnetLong$prep.during.part == 88] <- "POS-PUK"
+                                     artnetLong$prep.during.part2 == 2] <- "POS-PUK"
         
         # Partner == (+)
         artnetLong$d_hivprep[artnetLong$hiv3 == 1 & 
@@ -208,17 +241,17 @@ artnetLong$d_hivprep <- NULL
         # Partner == (-) no PrEP
         artnetLong$d_hivprep[artnetLong$hiv3 == 2 &
                                      artnetLong$p_hiv == 0 & 
-                                     artnetLong$prep.during.part == 3] <- "UNK-NOP"
+                                     artnetLong$prep.during.part2 == 0] <- "UNK-NOP"
         
         # Partner == (-) PrEP
         artnetLong$d_hivprep[artnetLong$hiv3 == 2 &
                                      artnetLong$p_hiv == 0 & 
-                                     artnetLong$prep.during.part %in% c(1, 2)] <- "UNK-YEP"
+                                     artnetLong$prep.during.part2 == 1] <- "UNK-YEP"
         
         # Partner == (-) PrEP UNK
         artnetLong$d_hivprep[artnetLong$hiv3 == 2 &
                                      artnetLong$p_hiv == 0 & 
-                                     artnetLong$prep.during.part == 88] <- "UNK-PUK"
+                                     artnetLong$prep.during.part2 == 2] <- "UNK-PUK"
         
         # Partner == (+)
         artnetLong$d_hivprep[artnetLong$hiv3 == 2 &
@@ -227,3 +260,4 @@ artnetLong$d_hivprep <- NULL
         # Partner == (?)
         artnetLong$d_hivprep[artnetLong$hiv3 == 2 &
                                      artnetLong$p_hiv == 2] <- "UNK-UNK"
+        

@@ -1,5 +1,6 @@
-"HIV serosorting, conditional on HIV reported Negative or Positive",,,Alters,,,
-Egos,Total N,%,Negative n,%,Positive n,%
-Negative,9184,91,8752,95,432,5
-Positive,948,9,581,61,367,39
-Total,10132,100,9333,92,799,8
+"","V1","V2","V3","V4","V5","V6","V7"
+"table3a.title","HIV serosorting, conditional on HIV reported Negative or Positive","","","Alters","","",""
+"table3a.colnames","Egos","Total N","%","Negative n","%","Positive n","%"
+"","Negative","9184","90.6435057244374","8752","95.2961672473868","432","4.70383275261324"
+"","Positive","948","9.35649427556257","581","61.2869198312236","367","38.7130801687764"
+"","Total","10132","100","9333","92.1140939597315","799","7.88590604026846"
