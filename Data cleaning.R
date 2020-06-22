@@ -112,7 +112,7 @@ artnetLong <- inner_join(artnetLong, pall.vars, by = c("AMIS_ID", "PARTNER_ID"))
 artnetLong$p_hiv[which(is.na(artnetLong$p_hiv))] <- 2 #  Recoding unknown (NA) partners' hiv as unknown (2)
 
 ## Egos' PrEP
-# Having trouble with the following line, so I just initialized all values to 2 and then recoded accoridngly
+# Having trouble with the following line, so I just initialized all values to 2 and then recoded accordingly
 # Can't change the NA values for only HIV == 0
 # artnetLong$prep.during.ego2[artnetLong$hiv3 == 0 & is.na(artnetLong$prep.during.ego)] <- 2
 artnetLong$prep.during.ego2 <- rep(2, nrow(artnetLong))
@@ -261,3 +261,14 @@ artnetLong$d_hivprep <- NULL
         artnetLong$d_hivprep[artnetLong$hiv3 == 2 &
                                      artnetLong$p_hiv == 2] <- "UNK-UNK"
         
+#### Changing to factors
+
+artnetLong$hiv3 = factor(artnetLong$hiv3, labels = c("Neg", "Pos", "Unk"))
+artnetLong$p_hiv = factor(artnetLong$p_hiv, labels = c("Neg", "Pos", "Unk"))
+artnetLong$prep.during.ego2 = factor(artnetLong$prep.during.ego2, labels = c("No", "Yes", "Unk"))
+artnetLong$prep.during.part2 = factor(artnetLong$prep.during.part2, labels = c("No", "Yes", "Unk"))
+
+artnetLong$age.cat = factor(artnetLong$age.cat)
+artnetLong$race.cat = factor(artnetLong$race.cat)
+artnetLong$p_age.cat_imp = factor(artnetLong$p_age.cat_imp)
+artnetLong$p_race.cat = factor(artnetLong$p_race.cat)
