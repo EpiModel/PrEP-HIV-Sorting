@@ -1,9 +1,9 @@
 {
-    "path" : "~/GitHub/PrEP-HIV-Sorting",
-    "sortOrder" : [
+    "path": "~/GitHub/PrEP-HIV-Sorting",
+    "sortOrder": [
         {
-            "ascending" : true,
-            "columnIndex" : 2
+            "columnIndex": 2,
+            "ascending": true
         }
     ]
 }

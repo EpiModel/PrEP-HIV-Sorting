@@ -33,3 +33,7 @@ vignettes/*.pdf
 *.knit.md
 .Rproj.user
 .DS_Store
+
+# MAN Data
+MAN_Data/*.sas7bdat
+MAN_Data/*.sas7bcat

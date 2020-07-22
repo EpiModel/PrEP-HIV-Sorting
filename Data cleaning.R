@@ -30,7 +30,6 @@ artnet$education[artnet$HLEDUCAT == 3] <- "High School Graduate"
 artnet$education[artnet$HLEDUCAT == 4] <- "Some College or Associates/Technical"
 artnet$education[artnet$HLEDUCAT == 5] <- "College or Greater"
 
-
 ### Long Data Set
 
 # Age --- using imputed age
