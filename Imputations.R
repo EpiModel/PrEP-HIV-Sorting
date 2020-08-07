@@ -486,9 +486,36 @@ meth.part <- c("", "", "", "", "", "", "myfunc", "", "", "", "") # Setting new m
 # Establishing new prediction matrix
 pred.part <- ini.part$predictorMatrix
 pred.part[,] <- 0
-pred.part["hiv3", c("city2", "race.cat", "age.cat")] <- 1
 pred.part["p_hiv", c("city2", "ptype", "hiv3", "prep.during.ego2", "p_race.cat", "p_age.cat_imp")] <- 1
-pred.part["prep.during.part2", c("city2", "ptype", "hiv3", "prep.during.ego2", "p_hiv", "p_race.cat", "p_age.cat_imp")] <- 1
 
 # Imputation Model
 imp.part <- mice(artnetSort1, m = 5, vis = vis, method = meth, pred = pred)
+
+# computing predictive distribution
+inla.imp <- inla(p_hiv ~ p_race.cat + p_age.cat_imp +
+                      ptype + hiv3 + prep.during.ego2 + city2 +
+                      f(AMIS_ID, model = "iid"), 
+              data = artnetSort8, family = "binomial", 
+              control.predictor = list(link = 1, compute = TRUE),
+              control.compute = list(config = TRUE))
+
+p_hiv.na <- which(is.na(artnetSort8$p_hiv))[1:2]
+rownames(artnetSort8)[p_hiv.na]
+
+inla.imp$summary.fitted.values[p_hiv.na, c("mean", "sd")]
+
+n.imp <- 50
+
+p_hiv.pred <- inla.posterior.sample(n.imp, inla.imp)
+
+p_hiv.pred[[1]]$latent[p_hiv.na,]
+
+imp.models <- lapply(1:n.imp, function(i) {
+        artnetSort8$p_hiv[p_hiv.na] <- p_hiv.pred[[i]]$latent[p_hiv.na,]
+        inla(p_hiv ~ p_race.cat + p_age.cat_imp +
+                     ptype + hiv3 + prep.during.ego2 + city2 +
+                     f(AMIS_ID, model = "iid"), 
+             data = artnetSort8, family = "binomial", 
+             control.predictor = list(link = 1, compute = TRUE))
+        })
+
