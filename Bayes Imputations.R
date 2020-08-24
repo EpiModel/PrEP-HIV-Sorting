@@ -56,7 +56,7 @@ artnetSort1 <- artnetLong %>%
 # Changing variables to numeric which is required by INLA for outcome
 artnetSort1$hiv3 <- as.numeric(artnetSort1$hiv3)
 artnetSort1$hiv3 = artnetSort1$hiv3 - 1
-artnetSort1$hiv3[artnetSort1$hiv3 == 2] <- NA
+artnetSort1$hiv3[artnetSort1$hiv3 == 2] <- NA # This is unnecessary? Not sure why this is here. Double check if using this approach
 
 artnetSort1$p_hiv <- as.numeric(artnetSort1$p_hiv)
 artnetSort1$p_hiv = artnetSort1$p_hiv - 1

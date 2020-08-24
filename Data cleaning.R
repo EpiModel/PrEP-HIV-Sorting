@@ -108,7 +108,7 @@ artnetLong <- inner_join(artnetLong, pall.vars, by = c("AMIS_ID", "PARTNER_ID"))
 ### Cleaning the crude variables
 
 ## Partners' HIV
-artnetLong$p_hiv[which(is.na(artnetLong$p_hiv))] <- 2 #  Recoding unknown (NA) partners' hiv as unknown (2)
+# artnetLong$p_hiv[which(is.na(artnetLong$p_hiv))] <- 2 #  Recoding unknown (NA) partners' hiv as unknown (2)
 
 ## Egos' PrEP
 # Having trouble with the following line, so I just initialized all values to 2 and then recoded accordingly
@@ -118,7 +118,8 @@ artnetLong$prep.during.ego2 <- rep(2, nrow(artnetLong))
 artnetLong$prep.during.ego2[artnetLong$prep.ever.ego == 0] <- 0 # Recoding Never PrEP as Never During Partnership (was NA)
 artnetLong$prep.during.ego2[artnetLong$prep.during.ego == 3] <- 0 # No PrEP during
 artnetLong$prep.during.ego2[which(artnetLong$prep.during.ego %in% c(1,2))] <- 1 # Always or Sometimes PrEP
-artnetLong$prep.during.ego2[which(artnetLong$prep.during.ego %in% c(88, 99))] <- 2 # Unknown
+artnetLong$prep.during.ego2[artnetLong$prep.during.ego == 88] <- 2 # I don't know
+artnetLong$prep.during.ego2[artnetLong$prep.during.ego == 99] <- NA # Prefer not to say
 
 artnetLong$prep.during.ego2[artnetLong$hiv3 == 1] <- NA # Setting back to NA for HIV-positive
 artnetLong$prep.during.ego2[artnetLong$hiv3 == 2] <- NA # Setting back to NA for HIV-unknown
@@ -130,7 +131,8 @@ artnetLong$prep.during.ego2[artnetLong$hiv3 == 2 & artnetLong$prep.ever.ego == 1
 artnetLong$prep.during.part2 <- rep(2, nrow(artnetLong))
 artnetLong$prep.during.part2[artnetLong$prep.during.part == 3] <- 0 # No PrEP during
 artnetLong$prep.during.part2[which(artnetLong$prep.during.part %in% c(1,2))] <- 1 # Always or Sometimes PrEP
-artnetLong$prep.during.part2[which(artnetLong$prep.during.part %in% c(88, 99))] <- 2 # Unknown
+artnetLong$prep.during.ego2[artnetLong$prep.during.ego == 88] <- 2 # I don't know
+artnetLong$prep.during.ego2[artnetLong$prep.during.ego == 99] <- NA # Prefer not to say
 
 artnetLong$prep.during.part2[artnetLong$p_hiv == 1] <- NA # Setting back to NA for HIV-positive
 
