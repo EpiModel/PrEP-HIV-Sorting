@@ -1,18 +1,18 @@
 library(haven)
 library("tidyverse")
 
-caliendo <- read_sas("MAN_Data/caliendo_merged.sas7bdat")
-duration <- read_sas("MAN_Data/duration_all_final.sas7bdat")
-master_id <- read_sas("MAN_Data/master_id_list_rev_final.sas7bdat")
-networks <- read_sas("MAN_Data/networks.sas7bdat")
-dyad_summary <- read_sas("MAN_Data/participant_dyad_summary.sas7bdat")
-partner_pairs <- read_sas("MAN_Data/partner_pairs.sas7bdat")
-partners_analysis <- read_sas("MAN_Data/partners_analysis_final.sas7bdat")
-partners_concurrency <- read_sas("MAN_Data/partners_concurrency.sas7bdat")
-partners_concurrency_eid_dedup <- read_sas("MAN_Data/partners_concurrency_eid_dedup.sas7bdat")
-sex_connections_dedup <- read_sas("MAN_Data/sex_connections_dedup.sas7bdat")
-status_within_network <- read_sas("MAN_Data/status_within_network.sas7bdat")
-survey_concurrency <- read_sas("MAN_Data/survey_concurrency.sas7bdat")
+# caliendo <- read_sas("MAN_Data/caliendo_merged.sas7bdat")
+# duration <- read_sas("MAN_Data/duration_all_final.sas7bdat")
+# master_id <- read_sas("MAN_Data/master_id_list_rev_final.sas7bdat")
+# networks <- read_sas("MAN_Data/networks.sas7bdat")
+# dyad_summary <- read_sas("MAN_Data/participant_dyad_summary.sas7bdat")
+# partner_pairs <- read_sas("MAN_Data/partner_pairs.sas7bdat")
+# partners_analysis <- read_sas("MAN_Data/partners_analysis_final.sas7bdat")
+# partners_concurrency <- read_sas("MAN_Data/partners_concurrency.sas7bdat")
+# partners_concurrency_eid_dedup <- read_sas("MAN_Data/partners_concurrency_eid_dedup.sas7bdat")
+# sex_connections_dedup <- read_sas("MAN_Data/sex_connections_dedup.sas7bdat")
+# status_within_network <- read_sas("MAN_Data/status_within_network.sas7bdat")
+# survey_concurrency <- read_sas("MAN_Data/survey_concurrency.sas7bdat")
 
 status <- read_sas("MAN_Data/status.sas7bdat")
 participants_survey <- read_sas("MAN_Data/participants_survey.sas7bdat")
@@ -68,11 +68,11 @@ HIV.ego_report %>% count(ptype)
 
 # there's some guys with missing ptype so this is potentially some useful info
 # need to see how this was handled in ARTnet
-check <- HIV.ego_report %>% filter(is.na(ptype))
-
-check2 <- HIV.ego_report %>% 
-        filter(final_id == 543 | final_id == 241 | final_id == 1515 | final_id == 299 | final_id == 969 | final_id == 1025 | final_id == 1472 | final_id == 1390 | final_id == 827) %>%
-        select(final_id, enrolled_final_id, main, morethanonce)
+# check <- HIV.ego_report %>% filter(is.na(ptype))
+# 
+# check2 <- HIV.ego_report %>% 
+#         filter(final_id == 543 | final_id == 241 | final_id == 1515 | final_id == 299 | final_id == 969 | final_id == 1025 | final_id == 1472 | final_id == 1390 | final_id == 827) %>%
+#         select(final_id, enrolled_final_id, main, morethanonce)
 
 
 # Self-reported HIV for egos
@@ -98,32 +98,38 @@ MAN.long$p_hiv.match[MAN.long$p_hiv %in% c(0,2) & MAN.long$p_hiv.validation == 1
 
 
 table(MAN.long$p_hiv, MAN.long$p_hiv.validation, useNA = "ifany")
-table(MAN.long$p_hiv, MAN.long$p_hiv.validation, MAN.long$ptype)
 table(MAN.long$p_hiv, MAN.long$p_hiv.match)
 
-check3 <- MAN.long %>% filter(p_hiv.match == 0 & p_hiv == 1)
-
 # Nondifferential
-sens <- 24/37
-spec <- 144/146
+sens.nd <- 24/37   #0.649
+spec.nd <- 144/146 #0.986
 
-# How would non-diff change prevalence of HIV among p_hiv
+# By partner type
+table(MAN.long$p_hiv, MAN.long$p_hiv.validation, MAN.long$ptype)
 
-artnetLong %>% count(p_hiv)
+sens.main <- 13/18 #0.722
+spec.main <- 74/75 #0.987
 
-# HIV prevalence = 0.05136437
-hiv.prev <- 832/(832+10361+5005)
+sens.casu <- 5/8   #0.625
+spec.casu <- 24/24 #1.0
 
-a <- 367
-b <- 432+33
-c <- 581+519
-d <- 8752+1028+3614+872
+sens.once <- 6/10  #0.6
+spec.once <- 40/41 #0.976
 
-E1 <- a+c
-E0 <- b+d
+# By HIV3
+table(MAN.long$p_hiv, MAN.long$p_hiv.validation, MAN.long$hiv3)
 
-A <- (a-E1*(1-spec)) / ((sens-(1-spec)))
-B <- (b-E0*(1-spec)) / ((sens-(1-spec)))
-C <- E1 - A
-D <- E0 - B
+sens.neg <- 2/9     #0.222
+spec.neg <- 126/126 #1.0
 
+sens.pos <- 21/26   #0.808
+spec.pos <- 11/12   #0.917
+
+sens.unk <- 1/1     #1.0
+spec.unk <- 7/7     #1.0
+
+# Specificity based on reported as unknown or negative
+table(MAN.long$p_hiv, MAN.long$p_hiv.validation)
+
+spec.p.neg <- 99/133 #0.744 P(p_hiv = 0|p_hiv.validation = 0)
+spec.p.unk <- 3/13   #0.23  P(p_hiv = 2|p_hiv.validation = 2)

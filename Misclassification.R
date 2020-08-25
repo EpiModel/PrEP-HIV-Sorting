@@ -3,10 +3,11 @@ rm(list = ls())
 source('~/GitHub/PrEP-HIV-Sorting/Data cleaning.R')
 
 library("INLA")
+library("lme4")
 
 #### Long df ----
 artnetSort1 <- artnetLong %>% 
-        filter(!is.na(p_race.cat)) %>%
+        filter(!is.na(p_race.cat), !is.na(p_hiv)) %>%
         select(AMIS_ID, city2, ptype, 
                hiv3, prep.during.ego2, race.cat, age.cat, 
                p_hiv, prep.during.part2, p_race.cat, p_age.cat_imp)
@@ -31,10 +32,6 @@ artnetSort1$p_hiv2 <- as.numeric(artnetSort1$p_hiv2)
 artnetSort1$p_hiv2 = artnetSort1$p_hiv2 - 1
 artnetSort1$p_hiv2[artnetSort1$p_hiv2 == 2] <- 0
 
-# p_hiv: imputed
-artnetSort1$p_hiv.imp <- NA
-artnetSort1$p_hiv.imp[artnetSort1$p_hiv == "Pos"] <- 1
-
 # deal with PrEP later
 # # prep: unk set to NA
 # artnetSort1$prep.during.part2 <- as.numeric(artnetSort1$prep.during.part2)
@@ -45,13 +42,22 @@ artnetSort1$p_hiv.imp[artnetSort1$p_hiv == "Pos"] <- 1
 artnetSort1$ptype = factor(artnetSort1$ptype,  labels = c("Main", "Casual", "Once"))
 
 #### Imputation model -----
-p_hiv2.lme4 <- glmer(p_hiv2 ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_imp +
-                             age.cat + race.cat + age.cat:race.cat +
-                             ptype + hiv3 + prep.during.ego2 + 
-                             ptype:hiv3 + ptype:prep.during.ego2 +
-                             city2 + (1 | AMIS_ID),
-                     data = artnetSort1, family = binomial(link=logit))
 
+# Tried this approach just to see
+# As expected, the model does not converge
+# p_hiv2.lme4 <- glmer(p_hiv2 ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_imp +
+#                              age.cat + race.cat + age.cat:race.cat +
+#                              ptype + hiv3 + prep.during.ego2 + 
+#                              ptype:hiv3 + ptype:prep.during.ego2 +
+#                              city2 + (1 | AMIS_ID),
+#                      data = artnetSort1, family = binomial(link=logit))
+# 
+# ss <- getME(p_hiv2.lme4,c("theta","fixef"))
+# p_hiv2.lme4.update <- update(p_hiv2.lme4, start = ss,
+#              control = glmerControl(optimizer = "bobyqa",
+#                                     optCtrl = list(maxfun=2e5)))
+# 
+# summary(p_hiv2.lme4.update)
 
 p_hiv2.inla <- inla(p_hiv2 ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_imp +
                             age.cat + race.cat + age.cat:race.cat +
@@ -75,7 +81,7 @@ p_hiv2.inla <- inla(p_hiv2 ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_i
 # Drawing predictive values from posterior distribution
 n.imp <- 1
 p_hiv2.pred.star <- inla.posterior.sample(n.imp, p_hiv2.inla)
-p_hiv2.pred.star[[1]]$latent[p_hiv2.pred.star[[1]]$latent > 0] <- 0
+p_hiv2.pred.star[[1]]$latent[p_hiv2.pred.star[[1]]$latent > 0] <- -0.001
 
 # P(hiv2* = 1)
 n.alters <- nrow(artnetSort1)
@@ -87,26 +93,45 @@ artnetSort2$p_hiv2.star1 <- exp(p_hiv2.pred.star[[1]]$latent[1:n.alters])
 artnetSort2$p_hiv2.star0 <- NA
 artnetSort2$p_hiv2.star0 <- 1 - artnetSort2$p_hiv2.star1
 
-sens <- 24/37
-spec <- 144/146
+# Median q.sens and q.spec
+artnetSort2$q.sens.med <- NA
+artnetSort2$q.spec.med <- NA
 
-# Don't think I will use the pi method, which modifies a median value
-# Will likely specify distributions for a few strata and draw randomly
-q.sens <- log(sens/(1-sens)) - log(sens.pi/(1-sens.pi))
-q.spec <- log(spec/(1-spec)) + log(spec.pi/(1-spec.pi))
+artnetSort2$q.sens.med <- log(0.9/(1-0.9))
+artnetSort2$q.spec.med <- log(0.986/(1-0.986))
 
+# Modified for original p_hiv values
+artnetSort2$q.sens.p_hiv <- NA
+artnetSort2$q.spec.p_hiv <- NA
+
+artnetSort2$q.sens.p_hiv[artnetSort2$p_hiv == "Pos"] <- artnetSort2$q.sens.med
+artnetSort2$q.spec.p_hiv[artnetSort2$p_hiv == "Pos"] <- 99
+
+artnetSort2$q.sens.p_hiv[artnetSort2$p_hiv == "Neg"] <- log(0.5/(1-0.5))
+artnetSort2$q.spec.p_hiv[artnetSort2$p_hiv == "Neg"] <- log(0.5/(1-0.5))
+
+artnetSort2$q.sens.p_hiv[artnetSort2$p_hiv == "Unk"] <- log(0.5/(1-0.5))
+artnetSort2$q.spec.p_hiv[artnetSort2$p_hiv == "Unk"] <- log(0.5/(1-0.5))
+
+# q.sens and q.spec values
 artnetSort2$q.sens <- NA
 artnetSort2$q.spec <- NA
 
-# Arbitrarily picking values for proof of concept
-artnetSort2$q.sens[artnetSort2$ptype == "Main"] <- log(0.98/(1-0.98))
-artnetSort2$q.spec[artnetSort2$ptype == "Main"] <- log(0.999/(1-0.999))
+artnetSort2$q.sens <- artnetSort2$q.sens.med - artnetSort2$q.sens.p_hiv
+artnetSort2$q.spec <- artnetSort2$q.spec.med + artnetSort2$q.spec.p_hiv
 
-artnetSort2$q.sens[artnetSort2$ptype == "Casual"] <- log(0.8/(1-0.8))
-artnetSort2$q.spec[artnetSort2$ptype == "Casual"] <- log(0.99/(1-0.99))
+# Arbitrarily picking values for ptype
+# artnetSort2$q.sens[artnetSort2$ptype == "Main"] <- log(0.98/(1-0.98))
+# artnetSort2$q.spec[artnetSort2$ptype == "Main"] <- log(0.999/(1-0.999))
+# 
+# artnetSort2$q.sens[artnetSort2$ptype == "Casual"] <- log(0.8/(1-0.8))
+# artnetSort2$q.spec[artnetSort2$ptype == "Casual"] <- log(0.99/(1-0.99))
+# 
+# artnetSort2$q.sens[artnetSort2$ptype == "Once"] <- log(sens/(1-sens))
+# artnetSort2$q.spec[artnetSort2$ptype == "Once"] <- log(spec/(1-spec))
 
-artnetSort2$q.sens[artnetSort2$ptype == "Once"] <- log(sens/(1-sens))
-artnetSort2$q.spec[artnetSort2$ptype == "Once"] <- log(spec/(1-spec))
+# q.sens <- log(sens/(1-sens)) - log(sens.pi/(1-sens.pi))
+# q.spec <- log(spec/(1-spec)) + log(spec.pi/(1-spec.pi))
 
 # P(Y*=y*|Y,X,R=0)
 artnetSort2$sens.xr <- NA
@@ -118,3 +143,18 @@ artnetSort2$spec.xr <- (artnetSort2$p_hiv2.star0 * exp(artnetSort2$q.spec)) / (a
 # P(Y=1|X,R=0)
 artnetSort2$p_hiv2.pred <- (artnetSort2$p_hiv2.star1 + artnetSort2$spec.xr - 1) / (artnetSort2$sens.xr + artnetSort2$spec.xr - 1)
 
+# p_hiv: imputed
+artnetSort2$p_hiv.imp <- NA
+artnetSort2$p_hiv.imp <- rbinom(nrow(artnetSort2),1,artnetSort2$p_hiv2.pred)
+
+check <- artnetSort2 %>% filter(artnetSort2$prep.during.part2 == "Yes")
+
+artnetSort2$hiv2 <- NA
+artnetSort2$hiv2[artnetSort2$hiv3 %in% c("Neg","Unk")] <- 0
+artnetSort2$hiv2[artnetSort2$hiv3 == "Pos"] <- 1
+
+table(artnetSort2$hiv2, artnetSort2$p_hiv.imp)
+table(artnetSort2$p_hiv.imp)
+table(artnetSort2$p_hiv, artnetSort2$p_hiv.imp)
+
+summary(check$p_hiv2.star1)
