@@ -1,5 +1,9 @@
-"","V1","V2","V3","V4","V5"
-"table6a.title","PrEP Sorting","Alters","","",""
-"table6a.colnames","Egos","No PrEP n","%","PrEP n","%"
-"","No PrEP","2575","78.4343588181541","708","21.5656411818459"
-"","PrEP","485","41.7024935511608","678","58.2975064488392"
+,V1,V2,V3,V4,V5,
+table6a.title,PrEP Sorting,Alters,,,,
+table6a.colnames,Egos,No PrEP n,%,PrEP n,%,
+,No PrEP,2575,78.43435882,708,21.56564118,3283
+,PrEP,485,41.70249355,678,58.29750645,1163
+,,3060,,1386,,
+,,,,,,
+,Ego's PrEP,0.261583446,,,,
+,Alter's PrEP,0.311740891,,,,
