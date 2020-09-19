@@ -15,14 +15,6 @@ artnet$age.cat[artnet$age >= 45 & artnet$age <= 54] <- "45-54"
 artnet$age.cat[artnet$age >= 55 & artnet$age <= 65] <- "55-65"
 artnet$age.cat[artnet$age > 65] <- "66+"
 
-artnetLong$age.cat <- rep(NA, nrow(artnetLong))
-artnetLong$age.cat[artnetLong$age >= 15 & artnetLong$age <= 24] <- "15-24"
-artnetLong$age.cat[artnetLong$age >= 25 & artnetLong$age <= 34] <- "25-34"
-artnetLong$age.cat[artnetLong$age >= 35 & artnetLong$age <= 44] <- "35-44"
-artnetLong$age.cat[artnetLong$age >= 45 & artnetLong$age <= 54] <- "45-54"
-artnetLong$age.cat[artnetLong$age >= 55 & artnetLong$age <= 65] <- "55-65"
-artnetLong$age.cat[artnetLong$age > 65] <- "66+"
-
 # Education
 artnet$education <- rep(NA, nrow(artnet))
 artnet$education[artnet$HLEDUCAT %in% c(0, 1, 2)] <- "Less than High School"
@@ -42,6 +34,14 @@ artnetLong$p_age.cat_imp[artnetLong$p_age_imp >= 45 & artnetLong$p_age_imp <= 54
 artnetLong$p_age.cat_imp[artnetLong$p_age_imp >= 55 & artnetLong$p_age_imp <= 65] <- "55-65"
 artnetLong$p_age.cat_imp[artnetLong$p_age_imp > 65] <- "66+"
 
+
+artnetLong$age.cat <- rep(NA, nrow(artnetLong))
+artnetLong$age.cat[artnetLong$age >= 15 & artnetLong$age <= 24] <- "15-24"
+artnetLong$age.cat[artnetLong$age >= 25 & artnetLong$age <= 34] <- "25-34"
+artnetLong$age.cat[artnetLong$age >= 35 & artnetLong$age <= 44] <- "35-44"
+artnetLong$age.cat[artnetLong$age >= 45 & artnetLong$age <= 54] <- "45-54"
+artnetLong$age.cat[artnetLong$age >= 55 & artnetLong$age <= 65] <- "55-65"
+artnetLong$age.cat[artnetLong$age > 65] <- "66+"
 
 # PrEP Use
 

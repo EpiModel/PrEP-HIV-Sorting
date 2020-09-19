@@ -3,7 +3,6 @@ rm(list = ls())
 source('~/GitHub/PrEP-HIV-Sorting/Data cleaning.R')
 
 library("INLA")
-library("lme4")
 library("purrr")
 
 #### Long df ----
@@ -56,8 +55,6 @@ artnetSort1$ptype = factor(artnetSort1$ptype,  labels = c("Main", "Casual", "Onc
 
 #### Imputation models -----
 
-
-
 artnetSort1$p_hiv3 <- artnetSort1$p_hiv2
 artnetSort1$p_hiv3[artnetSort1$p_hiv == "Unk"] <- NA
 
@@ -78,7 +75,6 @@ p_hiv2.inla3 <- inla(p_hiv3 ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_
                      control.predictor = list(link = 1, compute = TRUE),
                      control.compute = list(config = TRUE))
 
-
 #### Drawing predictive values from posterior distribution ----
 n.imp <- 1
 p_hiv2.pred.star <- inla.posterior.sample(n.imp, p_hiv2.inla3)
@@ -95,32 +91,11 @@ artnetSort1$p_hiv2.star0 <- 1 - artnetSort1$p_hiv2.star1
 artnetSort1$hiv2[artnetSort1$hiv3 %in% c("Neg","Unk")] <- 0
 artnetSort1$hiv2[artnetSort1$hiv3 == "Pos"] <- 1
 
-# # Using the median is just not working. Some values are way too high for observations
-# # Might make more sense to do this for just a few conbimations of y* and x
-# ## Median P(hiv2* = 1)
-# n.imp.med <- 25
-# p_hiv2.pred.star.med <- inla.posterior.sample(n.imp.med, p_hiv2.inla3)
-# 
-# # different way of doing what is below
-# # ll <- lapply(p_hiv2.pred.star.med, function(x) x$latent <- ifelse(x$latent > 0, -0.001, x$latent))
-# 
-# ll <- lapply(p_hiv2.pred.star.med, function(x) {
-#         x$latent <- ifelse(x$latent > 0, -0.001, x$latent)
-#         x$latent
-# })
-# 
-# df <- transpose(ll)
-# df2 <- lapply(df, function(x) as.numeric(x))
-# df3 <- vapply(df2, median, numeric(1))
-# df4 <- exp(df3[1:n.alters])
-
-
-
 #### q parameters ----
 pi <- median(artnetSort1$p_hiv2.star1)
-spec.pos <- runif(1, 0.986, 1)
-spec.neg <- runif(1, 0.986, spec.pos)
-spec.unk <- runif(1, spec.pos, 1)
+spec.pos <- runif(1, 1-pi + 0.004, 1)
+spec.neg <- runif(1, 1-pi, spec.pos) #1-pi + pi/2
+spec.unk <- runif(1, spec.neg, 1)
         
 sens.base <- runif(1, 0.98, 1)
 
@@ -132,60 +107,6 @@ sens.add.once <- sens.add.casual + runif(1, -0.045, -0.035)
 
 sens.mult.part.prep <- runif(1, 0, 1)
 sens.mult.ego.hiv <- runif(1, 0, 1)
-
-artnetSort1$sens.mult.part.prep <- ifelse(artnetSort1$prep.during.part2 == "Yes", sens.mult.part.prep, 1)
-artnetSort1$sens.mult.ego.hiv <- ifelse(artnetSort1$hiv2 == 1, sens.mult.ego.hiv, 1)
-
-# Lowest sensitivity
-# pi <- median(artnetSort1$p_hiv2.star1)
-# spec <- 0.986 #runif(1, median(artnetSort1$p_hiv2.star1), 1)
-# sens.base <- 0.98 #runif(1, 0.98, 1)
-# 
-# sens.mult.unk <- 5
-# 
-# sens.add.main <- -0.05 # runif(1, -0.05, -0.03)
-# sens.add.casual <- -0.05-0.03 # sens.add.main + runif(1, -0.03, -0.01)
-# sens.add.once <- -0.05-0.03-0.045 #sens.add.casual + runif(1, -0.045, -0.035)
-# 
-# sens.mult.part.prep <- 1 #runif(1, 0, 1)
-# sens.mult.ego.hiv <- 1 #runif(1, 0, 1)
-# 
-# artnetSort1$sens.mult.part.prep <- ifelse(artnetSort1$prep.during.part2 == "Yes", sens.mult.part.prep, 1)
-# artnetSort1$sens.mult.ego.hiv <- ifelse(artnetSort1$hiv2 == 1, sens.mult.ego.hiv, 1)
-
-# Highest sensitivity
-# pi <- median(artnetSort1$p_hiv2.star1)
-# spec <- 0.99 #runif(1, median(artnetSort1$p_hiv2.star1), 1)
-# sens.base <- 0.999 #runif(1, 0.98, 1)
-# 
-# sens.mult.unk <- 5
-# 
-# sens.add.main <- -0.03 # runif(1, -0.05, -0.03)
-# sens.add.casual <- -0.03-0.01 # sens.add.main + runif(1, -0.03, -0.01)
-# sens.add.once <- -0.03-0.01-0.035 #sens.add.casual + runif(1, -0.045, -0.035)
-# 
-# sens.mult.part.prep <- 0 #runif(1, 0, 1)
-# sens.mult.ego.hiv <- 0 #runif(1, 0, 1)
-# 
-# artnetSort1$sens.mult.part.prep <- ifelse(artnetSort1$prep.during.part2 == "Yes", sens.mult.part.prep, 1)
-# artnetSort1$sens.mult.ego.hiv <- ifelse(artnetSort1$hiv2 == 1, sens.mult.ego.hiv, 1)
-
-
-## Median q parameters
-pi <- median(artnetSort1$p_hiv2.star1)
-spec.neg <- 0.9895
-spec.pos <- 0.993 #runif(1, 0.986, 1)
-spec.unk <- 0.9965
-sens.base <- 0.99 #runif(1, 0.98, 1)
-
-sens.mult.unk <- 5
-
-sens.add.main <- -0.04 #runif(1, -0.05, -0.03)
-sens.add.casual <-sens.add.main + -0.02 #runif(1, -0.03, -0.01)
-sens.add.once <- sens.add.casual + -0.04 #runif(1, -0.045, -0.035)
-
-sens.mult.part.prep <- 0 #runif(1, 0, 1)
-sens.mult.ego.hiv <- 0 #runif(1, 0, 1)
 
 artnetSort1$sens.mult.part.prep <- ifelse(artnetSort1$prep.during.part2 == "Yes", sens.mult.part.prep, 1)
 artnetSort1$sens.mult.ego.hiv <- ifelse(artnetSort1$hiv2 == 1, sens.mult.ego.hiv, 1)
@@ -223,16 +144,17 @@ artnetSort1$p_hiv2.pred <- (artnetSort1$p_hiv2.star1 + artnetSort1$spec.xr - 1) 
 artnetSort1$p_hiv.imp <- NA
 artnetSort1$p_hiv.imp <- rbinom(nrow(artnetSort1),1,artnetSort1$p_hiv2.pred)
 
-# table(artnetSort1$p_hiv, artnetSort1$p_hiv.imp)
+table(artnetSort1$p_hiv, artnetSort1$p_hiv.imp)
+mean(artnetSort1$p_hiv2.pred)
+by(artnetSort1$p_hiv2.pred, artnetSort1$p_hiv, mean)
+
+
 # table(artnetSort1$p_hiv.imp)
 # 
 # table(artnetSort1$hiv2, artnetSort1$p_hiv.imp)
 # table(artnetSort1$prep.during.part2, artnetSort1$p_hiv.imp)
 # table(artnetSort1$prep.during.part2, artnetSort1$p_hiv)
-# 
-# mean(artnetSort1$p_hiv2.pred)
-# by(artnetSort1$p_hiv2.pred, artnetSort1$p_hiv, mean)
-# 
+
 # artnetSort3 <- filter(artnetSort1, p_hiv == "Unk", hiv3 == "Pos")
 # by(artnetSort3$p_hiv2.pred, artnetSort3$ptype, mean)
 
@@ -264,15 +186,6 @@ prep.inla <- inla(prep.part ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_
                      control.predictor = list(link = 1, compute = TRUE),
                      control.compute = list(config = TRUE))
 
-
-# table(artnetSort2$prep.during.part2, useNA = "ifany")
-
-# table(artnetSort1$prep.during.part2, artnetSort1$p_hiv.imp)
-# table(artnetSort1$prep.during.part2)
- 
-# by(artnetSort1$p_hiv2.pred, artnetSort1$prep.during.part2, mean)
-
-
 #### Drawing predictive values from posterior distribution ----
 n.imp <- 1
 prep.pred.star <- inla.posterior.sample(n.imp, prep.inla)
@@ -287,17 +200,22 @@ artnetSort2$prep.star0 <- 1 - artnetSort2$prep.star1
 
 #### q parameters ----
 prep.pi <- median(artnetSort2$prep.star1)
-prep.spec.yes <- runif(1, 0.986, 1)
-prep.spec.no <- runif(1, 0.986, spec.pos)
-prep.spec.unk <- runif(1, spec.pos, 1)
+
+prep.spec.no <- runif(1, 1 - prep.pi + 0.01, 1 - prep.pi + 0.03)
+prep.spec.unk <- runif(1, prep.spec.no, prep.spec.no + 0.03)
+
+prep.spec.yes <- 1 - prep.pi
+prep.spec.add.casual <- runif(1,0,prep.pi) # prep.pi / 2
+prep.spec.add.main <- runif(1,prep.spec.add.casual,prep.pi) # prep.pi - 0.01
+prep.spec.add.once <- runif(1,0,prep.spec.add.casual) #0 + 0.01 
 
 prep.sens.base <- runif(1, 0.98, 1)
 
-prep.sens.mult.unk <- 5
+prep.sens.mult.unk <- 3
 
-prep.sens.add.main <- runif(1, -0.05, -0.03)
-prep.sens.add.casual <-prep.sens.add.main + runif(1, -0.03, -0.01)
-prep.sens.add.once <- prep.sens.add.casual + runif(1, -0.045, -0.035)
+prep.sens.add.main <- runif(1, -0.04, -0.02)
+prep.sens.add.casual <- prep.sens.add.main + runif(1, -0.03, -0.01)
+prep.sens.add.once <- prep.sens.add.casual + runif(1, -0.04, -0.02)
 
 prep.sens.mult.ego.prep <- runif(1, 0, 1)
 prep.sens.mult.ego.hiv <- runif(1, 0, 1)
@@ -305,28 +223,11 @@ prep.sens.mult.ego.hiv <- runif(1, 0, 1)
 artnetSort2$prep.sens.mult.ego.prep <- ifelse(artnetSort2$prep.during.ego2 == 1, prep.sens.mult.ego.prep, 1)
 artnetSort2$prep.sens.mult.ego.hiv <- ifelse(artnetSort2$hiv2 == 1, prep.sens.mult.ego.hiv, 1)
 
-
-# median q parameters
-prep.pi <- median(artnetSort2$prep.star1)
-prep.spec.no <- 0.8
-prep.spec.yes <- 0.75
-prep.spec.unk <- 0.9965
-
-prep.sens.base <- 0.99 #runif(1, 0.98, 1)
-
-prep.sens.mult.unk <- 5
-
-prep.sens.add.main <- -0.04 #runif(1, -0.05, -0.03)
-prep.sens.add.casual <- prep.sens.add.main + -0.02 #runif(1, -0.03, -0.01)
-prep.sens.add.once <- prep.sens.add.casual + -0.04 #runif(1, -0.045, -0.035)
-
-prep.sens.mult.ego.prep <- 0 #runif(1, 0, 1)
-prep.sens.mult.ego.hiv <- 0 #runif(1, 0, 1)
-
-artnetSort2$prep.sens.mult.ego.prep <- ifelse(artnetSort2$prep.during.ego2 == 1, prep.sens.mult.ego.prep, 1)
-artnetSort2$prep.sens.mult.ego.hiv <- ifelse(artnetSort2$hiv2 == 1, prep.sens.mult.ego.hiv, 1)
-
 # calculating target sens and spec
+artnetSort2$prep.spec[artnetSort2$ptype == "Main" & artnetSort2$prep.during.part2 == "Yes"] <- prep.spec.yes + prep.spec.add.main
+artnetSort2$prep.spec[artnetSort2$ptype == "Casual" & artnetSort2$prep.during.part2 == "Yes"] <- prep.spec.yes + prep.spec.add.casual
+artnetSort2$prep.spec[artnetSort2$ptype == "Once" & artnetSort2$prep.during.part2 == "Yes"] <- prep.spec.yes + prep.spec.add.once
+
 artnetSort2$prep.sens[artnetSort2$ptype == "Main" & artnetSort2$prep.during.part2 == "No"] <- prep.sens.base
 artnetSort2$prep.sens[artnetSort2$ptype == "Main" & artnetSort2$prep.during.part2 == "Unk"] <- prep.sens.base + prep.sens.add.main * prep.sens.mult.unk
 
@@ -336,13 +237,12 @@ artnetSort2$prep.sens[artnetSort2$ptype == "Casual" & artnetSort2$prep.during.pa
 artnetSort2$prep.sens[artnetSort2$ptype == "Once" & artnetSort2$prep.during.part2 == "No"] <- prep.sens.base + prep.sens.add.once * artnetSort2$prep.sens.mult.ego.prep[artnetSort2$ptype == "Once" & artnetSort2$prep.during.part2 == "No"] * artnetSort2$prep.sens.mult.ego.hiv[artnetSort2$ptype == "Once" & artnetSort2$prep.during.part2 == "No"]
 artnetSort2$prep.sens[artnetSort2$ptype == "Once" & artnetSort2$prep.during.part2 == "Unk"] <- prep.sens.base + prep.sens.add.once * prep.sens.mult.unk
 
-# artnetSort2$prep.sens[artnetSort2$prep.during.part2 == "Yes"] <- 0.999
-
 artnetSort2$prep.q.sens <- log(artnetSort2$prep.sens/(1-artnetSort2$prep.sens)) - log(prep.pi/(1-prep.pi))
+
 artnetSort2$prep.q.sens[artnetSort2$prep.during.part2 == "Yes"] <- 0.01
 
 artnetSort2$prep.q.spec[artnetSort2$prep.during.part2 == "No"] <- log(prep.spec.no/(1-prep.spec.no)) + log(prep.pi/(1-prep.pi))
-artnetSort2$prep.q.spec[artnetSort2$prep.during.part2 == "Yes"] <- log(prep.spec.yes/(1-prep.spec.yes)) + log(prep.pi/(1-prep.pi))
+artnetSort2$prep.q.spec[artnetSort2$prep.during.part2 == "Yes"] <- log(artnetSort2$prep.spec[artnetSort2$prep.during.part2 == "Yes"]/(1-artnetSort2$prep.spec[artnetSort2$prep.during.part2 == "Yes"])) + log(prep.pi/(1-prep.pi))
 artnetSort2$prep.q.spec[artnetSort2$prep.during.part2 == "Unk"] <- log(prep.spec.unk/(1-prep.spec.unk)) + log(prep.pi/(1-prep.pi))
 
 # P(Y*=y*|Y,X,R=0)
@@ -360,8 +260,33 @@ artnetSort2$prep.pred <- (artnetSort2$prep.star1 + artnetSort2$prep.spec.xr - 1)
 artnetSort2$prep.imp <- NA
 artnetSort2$prep.imp <- rbinom(nrow(artnetSort2),1,artnetSort2$prep.pred)
 
-
+mean(artnetSort2$prep.pred)
 by(artnetSort2$prep.pred, artnetSort2$prep.during.part2, mean)
 
-by(artnetSort2$prep.star1, artnetSort2$prep.during.part2, mean)
-table(artnetSort2$prep.during.part2, artnetSort2$ptype, useNA = "ifany")
+mean(artnetSort1$p_hiv2.pred)
+by(artnetSort1$p_hiv2.pred, artnetSort1$p_hiv, mean)
+
+check <- artnetSort1 %>% filter(!p_hiv == "Pos")
+by(check$p_hiv2.pred, check$prep.during.part2, mean)
+table(check$prep.during.part2, check$p_hiv)
+
+# by(artnetSort2$prep.star1, artnetSort2$prep.during.part2, mean)
+# 
+# table(artnetSort2$prep.during.part2, artnetSort2$ptype, useNA = "ifany")
+# 
+# check <- artnetSort2 %>% filter(artnetSort2$prep.during.part2 == "Yes")
+# by(check$prep.spec, check$ptype, mean)
+# 
+# table(artnetSort2$prep.during.part2, useNA = "ifany")
+# 
+# table(artnetSort1$hiv3, useNA = "ifany") # 9% of partnerships
+# table(artnetSort1$p_hiv.imp, useNA = "ifany") #11% of partnerships (changes with imputation)
+# 
+# table(artnetSort1$prep.during.ego2, useNA = "ifany") # 18% of partnerships
+# check <- artnetSort1 %>% filter(!p_hiv == "Pos")
+# table(check$prep.during.part2, check$p_hiv) #17.6% among neg, 2.3% among unk
+# table(check$prep.during.part2) #13% among all neg/unk
+# 
+# check <- artnetSort2 %>% filter(is.na(artnetSort2$prep.pred))
+# 
+# table(artnetSort2$prep.during.ego2, artnetSort2$prep.imp, useNA = "ifany")
