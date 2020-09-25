@@ -4,10 +4,9 @@ library("tidyverse")
 artnet <- ARTnet.wide
 artnetLong <- ARTnet.long
 
-### Egos
+#### Egos -----
 
-# Age
-artnet$age.cat <- rep(NA, nrow(artnet))
+# Ego Age
 artnet$age.cat[artnet$age >= 15 & artnet$age <= 24] <- "15-24"
 artnet$age.cat[artnet$age >= 25 & artnet$age <= 34] <- "25-34"
 artnet$age.cat[artnet$age >= 35 & artnet$age <= 44] <- "35-44"
@@ -15,18 +14,15 @@ artnet$age.cat[artnet$age >= 45 & artnet$age <= 54] <- "45-54"
 artnet$age.cat[artnet$age >= 55 & artnet$age <= 65] <- "55-65"
 artnet$age.cat[artnet$age > 65] <- "66+"
 
-# Education
-artnet$education <- rep(NA, nrow(artnet))
+# Ego Education
 artnet$education[artnet$HLEDUCAT %in% c(0, 1, 2)] <- "Less than High School"
 artnet$education[artnet$HLEDUCAT == 3] <- "High School Graduate"
 artnet$education[artnet$HLEDUCAT == 4] <- "Some College or Associates/Technical"
 artnet$education[artnet$HLEDUCAT == 5] <- "College or Greater"
 
-### Long Data Set
+#### Long Data Set -----
 
-# Age --- using imputed age
-# Check on what imputed age is & whether this is most appropriate option
-artnetLong$p_age.cat_imp <- rep(NA, nrow(artnetLong))
+# Partner Age --- using imputed age
 artnetLong$p_age.cat_imp[artnetLong$p_age_imp >= 15 & artnetLong$p_age_imp <= 24] <- "15-24"
 artnetLong$p_age.cat_imp[artnetLong$p_age_imp >= 25 & artnetLong$p_age_imp <= 34] <- "25-34"
 artnetLong$p_age.cat_imp[artnetLong$p_age_imp >= 35 & artnetLong$p_age_imp <= 44] <- "35-44"
@@ -35,7 +31,7 @@ artnetLong$p_age.cat_imp[artnetLong$p_age_imp >= 55 & artnetLong$p_age_imp <= 65
 artnetLong$p_age.cat_imp[artnetLong$p_age_imp > 65] <- "66+"
 
 
-artnetLong$age.cat <- rep(NA, nrow(artnetLong))
+# Ego Age
 artnetLong$age.cat[artnetLong$age >= 15 & artnetLong$age <= 24] <- "15-24"
 artnetLong$age.cat[artnetLong$age >= 25 & artnetLong$age <= 34] <- "25-34"
 artnetLong$age.cat[artnetLong$age >= 35 & artnetLong$age <= 44] <- "35-44"
@@ -44,8 +40,6 @@ artnetLong$age.cat[artnetLong$age >= 55 & artnetLong$age <= 65] <- "55-65"
 artnetLong$age.cat[artnetLong$age > 65] <- "66+"
 
 # PrEP Use
-
-# PREP_CURRENT PREPCURRENT_AMIS artnetPREP_CURRENT PARTXPREPSTART PARTXPREPUSE PARTXPREPUSE_PART
 
 # Variables for each partner
 p1.vars <- select(artnet, AMIS_ID, 
@@ -105,42 +99,33 @@ pall.vars$ONCE <- NULL
 # Adding the new partner variables to artnetLong
 artnetLong <- inner_join(artnetLong, pall.vars, by = c("AMIS_ID", "PARTNER_ID"))
 
+#### Removing n = 947 alters with missing race
+artnetLong <- artnetLong[which(!is.na(artnetLong$p_race.cat)),]
+
 ### Cleaning the crude variables
+## Egos' PrEP - Ever == 1 & Never == 0 during partnership; 0 for all HIV+ and HIV?; All missing among HIV- set to (2) unkown during partnership
+artnetLong$prep.during.ego2[artnetLong$hiv3 == 0 & is.na(artnetLong$prep.during.ego)] <- 2 # Missing set to Unknown
+artnetLong$prep.during.ego2[artnetLong$prep.ever.ego == 0] <- 0 # Never PrEP set to Never During Partnership (was NA)
+artnetLong$prep.during.ego2[artnetLong$prep.during.ego == 3] <- 0 # No PrEP during
+artnetLong$prep.during.ego2[artnetLong$prep.during.ego == 88] <- 2 # I don't know
+artnetLong$prep.during.ego2[artnetLong$prep.during.ego == 99] <- 2 # Prefer not to say set to unknown
+artnetLong$prep.during.ego2[which(artnetLong$prep.during.ego %in% c(1,2))] <- 1 # Always or Sometimes PrEP
+artnetLong$prep.during.ego2[which(artnetLong$hiv3 %in% c(1,2))] <- 0 #All HIV+ and HIV-Unknown are missing PrEP (13 HIV-Unk have used PrEP before but missing for during partnership)
 
 ## Partners' HIV
-# artnetLong$p_hiv[which(is.na(artnetLong$p_hiv))] <- 2 #  Recoding unknown (NA) partners' hiv as unknown (2)
-
-## Egos' PrEP
-# Having trouble with the following line, so I just initialized all values to 2 and then recoded accordingly
-# Can't change the NA values for only HIV == 0
-# artnetLong$prep.during.ego2[artnetLong$hiv3 == 0 & is.na(artnetLong$prep.during.ego)] <- 2
-artnetLong$prep.during.ego2 <- rep(2, nrow(artnetLong))
-artnetLong$prep.during.ego2[artnetLong$prep.ever.ego == 0] <- 0 # Recoding Never PrEP as Never During Partnership (was NA)
-artnetLong$prep.during.ego2[artnetLong$prep.during.ego == 3] <- 0 # No PrEP during
-artnetLong$prep.during.ego2[which(artnetLong$prep.during.ego %in% c(1,2))] <- 1 # Always or Sometimes PrEP
-artnetLong$prep.during.ego2[artnetLong$prep.during.ego == 88] <- 2 # I don't know
-artnetLong$prep.during.ego2[artnetLong$prep.during.ego == 99] <- NA # Prefer not to say
-
-artnetLong$prep.during.ego2[artnetLong$hiv3 == 1] <- NA # Setting back to NA for HIV-positive
-artnetLong$prep.during.ego2[artnetLong$hiv3 == 2] <- NA # Setting back to NA for HIV-unknown
-artnetLong$prep.during.ego2[artnetLong$hiv3 == 2 & artnetLong$prep.ever.ego == 0] <- 0 # Unknown HIV but Never used PrEP
-artnetLong$prep.during.ego2[artnetLong$hiv3 == 2 & artnetLong$prep.ever.ego == 1] <- 2 # Unknown HIV but HAVE used PrEP before
+artnetLong$p_hiv[is.na(artnetLong$p_hiv)] <- 2 #Setting 20 NA to Unknown (2)
 
 ## Partners' PrEP
-# Same issue as above so starting out by initializing all as 2
-artnetLong$prep.during.part2 <- rep(2, nrow(artnetLong))
+artnetLong$prep.during.part2[artnetLong$p_hiv %in% c(0,2) & is.na(artnetLong$prep.during.part)] <- 2 # Missing set to Unknown
+artnetLong$prep.during.part2[artnetLong$prep.during.part == 88] <- 2 # I don't know
+artnetLong$prep.during.part2[artnetLong$prep.during.part == 99] <- 2 # Prefer not to say
 artnetLong$prep.during.part2[artnetLong$prep.during.part == 3] <- 0 # No PrEP during
 artnetLong$prep.during.part2[which(artnetLong$prep.during.part %in% c(1,2))] <- 1 # Always or Sometimes PrEP
-artnetLong$prep.during.ego2[artnetLong$prep.during.ego == 88] <- 2 # I don't know
-artnetLong$prep.during.ego2[artnetLong$prep.during.ego == 99] <- NA # Prefer not to say
-
-artnetLong$prep.during.part2[artnetLong$p_hiv == 1] <- NA # Setting back to NA for HIV-positive
+artnetLong$prep.during.part2[artnetLong$p_hiv == 1] <- 0 # Set all HIV+ to No PrEP
 
 #### Dyads
 
 #HIV mixing
-artnetLong$d_hiv <- NULL
-
 artnetLong$d_hiv[artnetLong$hiv3 == 0 & artnetLong$p_hiv == 0] <- "NEGNEG"
 artnetLong$d_hiv[artnetLong$hiv3 == 0 & artnetLong$p_hiv == 1] <- "NEGPOS"
 artnetLong$d_hiv[artnetLong$hiv3 == 0 & artnetLong$p_hiv == 2] <- "NEGUNK"
@@ -154,8 +139,6 @@ artnetLong$d_hiv[artnetLong$hiv3 == 2 & artnetLong$p_hiv == 1] <- "UNKPOS"
 artnetLong$d_hiv[artnetLong$hiv3 == 2 & artnetLong$p_hiv == 2] <- "UNKUNK"
 
 ### PREP & HIV mixing ###
-artnetLong$d_hivprep <- NULL
-
 ## Ego == (-) no PrEP
         # Partner == (-) no PrEP
         artnetLong$d_hivprep[artnetLong$hiv3 == 0 & 
@@ -263,7 +246,6 @@ artnetLong$d_hivprep <- NULL
                                      artnetLong$p_hiv == 2] <- "UNK-UNK"
         
 #### Changing to factors
-
 artnetLong$hiv3 = factor(artnetLong$hiv3, labels = c("Neg", "Pos", "Unk"))
 artnetLong$p_hiv = factor(artnetLong$p_hiv, labels = c("Neg", "Pos", "Unk"))
 artnetLong$prep.during.ego2 = factor(artnetLong$prep.during.ego2, labels = c("No", "Yes", "Unk"))

@@ -3,72 +3,48 @@ rm(list = ls())
 source('~/GitHub/PrEP-HIV-Sorting/Data cleaning.R')
 
 library("INLA")
-library("purrr")
 
 #### Long df ----
-artnetSort1 <- artnetLong %>% 
-        filter(!is.na(p_race.cat), !is.na(p_hiv)) %>%
+artnetSort1 <- artnetLong %>%
         select(AMIS_ID, city2, ptype, 
                hiv3, prep.during.ego2, race.cat, age.cat, 
                p_hiv, prep.during.part2, p_race.cat, p_age.cat_imp)
 
-### Ego level variables
-
-# prep: assuming no PrEP for those missing
-artnetSort1$prep.during.ego2 <- as.numeric(artnetSort1$prep.during.ego2)
-artnetSort1$prep.during.ego2 = artnetSort1$prep.during.ego2 - 1
-artnetSort1$prep.during.ego2[artnetSort1$prep.during.ego2 == 2] <- 0
-artnetSort1$prep.during.ego2[which(is.na(artnetSort1$prep.during.ego2))] <- 0
+## Unique ID for each alter
+artnetSort1$alter_id <- seq(1:nrow(artnetSort1))
 
 # Covariates set to factor
 artnetSort1$age.cat = factor(artnetSort1$age.cat)
 artnetSort1$race.cat = factor(artnetSort1$race.cat)
+artnetSort1$ptype = factor(artnetSort1$ptype,  labels = c("Main", "Casual", "Once"))
+
+
+### Ego level variables
+
+# hiv2: 2 level variable from hiv3
+artnetSort1$hiv2[artnetSort1$hiv3 %in% c("Neg","Unk")] <- 0
+artnetSort1$hiv2[artnetSort1$hiv3 == "Pos"] <- 1
 
 ### Partner level variables
-# p_hiv: 2 level (0 == neg or unk; 1 == pos)
-artnetSort1$p_hiv2 <- artnetSort1$p_hiv
-artnetSort1$p_hiv2 <- as.numeric(artnetSort1$p_hiv2)
+
+# p_hiv: 2 level (Neg == 0; Pos == 1; Unk == NA)
+artnetSort1$p_hiv2 <- as.numeric(artnetSort1$p_hiv)
 artnetSort1$p_hiv2 = artnetSort1$p_hiv2 - 1
-artnetSort1$p_hiv2[artnetSort1$p_hiv2 == 2] <- 0
-
-#p_hiv: dummy variables
-artnetSort1$p_pos <- NA
-artnetSort1$p_pos[artnetSort1$p_hiv == "Pos"] <- 1
-artnetSort1$p_pos[artnetSort1$p_hiv == "Neg" | artnetSort1$p_hiv == "Unk"] <- 0
-
-artnetSort1$p_neg <- NA
-artnetSort1$p_neg[artnetSort1$p_hiv == "Neg"] <- 1
-artnetSort1$p_neg[artnetSort1$p_hiv == "Pos" | artnetSort1$p_hiv == "Unk"] <- 0
-
-artnetSort1$p_unk <- NA
-artnetSort1$p_unk[artnetSort1$p_hiv == "Unk"] <- 1
-artnetSort1$p_unk[artnetSort1$p_hiv == "Pos" | artnetSort1$p_hiv == "Neg"] <- 0
-
-# deal with PrEP later
-# # prep: unk set to NA
-# artnetSort1$prep.during.part2 <- as.numeric(artnetSort1$prep.during.part2)
-# artnetSort1$prep.during.part2 = artnetSort1$prep.during.part2 - 1
-# artnetSort1$prep.during.part2[artnetSort1$prep.during.part2 == 2] <- NA
-
-# ptype set to factor
-artnetSort1$ptype = factor(artnetSort1$ptype,  labels = c("Main", "Casual", "Once"))
+artnetSort1$p_hiv2[artnetSort1$p_hiv2 == 2] <- NA
 
 #### Imputation models -----
 
-artnetSort1$p_hiv3 <- artnetSort1$p_hiv2
-artnetSort1$p_hiv3[artnetSort1$p_hiv == "Unk"] <- NA
-
 # This induces too strong of a relationship with hiv3 and the predictive values
-# p_hiv2.inla <- inla(p_hiv2 ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_imp +
+# p_hiv2.inla2 <- inla(p_hiv2 ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_imp +
 #                             age.cat + race.cat + age.cat:race.cat +
-#                             ptype + hiv3 + prep.during.ego2 + 
+#                             ptype + hiv3 + prep.during.ego2 +
 #                             ptype:hiv3 + ptype:prep.during.ego2 +
 #                             city2 + f(AMIS_ID, model = "iid"),
 #                     data = artnetSort1, family = "binomial",
 #                     control.predictor = list(link = 1, compute = TRUE),
 #                     control.compute = list(config = TRUE))
 
-p_hiv2.inla3 <- inla(p_hiv3 ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_imp +
+p_hiv2.inla <- inla(p_hiv2 ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_imp +
                              age.cat + race.cat + age.cat:race.cat +
                              city2 + f(AMIS_ID, model = "iid"),
                      data = artnetSort1, family = "binomial",
@@ -77,24 +53,29 @@ p_hiv2.inla3 <- inla(p_hiv3 ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_
 
 #### Drawing predictive values from posterior distribution ----
 n.imp <- 1
-p_hiv2.pred.star <- inla.posterior.sample(n.imp, p_hiv2.inla3)
+p_hiv2.pred.star <- inla.posterior.sample(n.imp, p_hiv2.inla)
 p_hiv2.pred.star[[1]]$latent[p_hiv2.pred.star[[1]]$latent > 0] <- -0.001
 
+
+# p_hiv2.pred.star <- lapply(p_hiv2.pred.star, function(x) {
+#                         x$latent <- ifelse(x$latent > 0, -0.001, x$latent)
+#                         exp(x$latent)
+#                         })
+# 
+# p_hiv2.pred.star <- transpose(p_hiv2.pred.star)        
+
+
+
 # P(hiv2* = 1)
-n.alters <- nrow(artnetSort1)
-artnetSort1$p_hiv2.star1 <- exp(p_hiv2.pred.star[[1]]$latent[1:n.alters])
+artnetSort1$p_hiv2.star1 <- exp(p_hiv2.pred.star[[1]]$latent[1:nrow(artnetSort1)])
 
 ## P(hiv2* = 0)
 artnetSort1$p_hiv2.star0 <- 1 - artnetSort1$p_hiv2.star1
 
-# Creating a 2 level variable
-artnetSort1$hiv2[artnetSort1$hiv3 %in% c("Neg","Unk")] <- 0
-artnetSort1$hiv2[artnetSort1$hiv3 == "Pos"] <- 1
-
 #### q parameters ----
 pi <- median(artnetSort1$p_hiv2.star1)
 spec.pos <- runif(1, 1-pi + 0.004, 1)
-spec.neg <- runif(1, 1-pi, spec.pos) #1-pi + pi/2
+spec.neg <- runif(1, 1-pi, 1-pi + pi/2) 
 spec.unk <- runif(1, spec.neg, 1)
         
 sens.base <- runif(1, 0.98, 1)
@@ -130,9 +111,6 @@ artnetSort1$q.spec[artnetSort1$p_hiv == "Unk"] <- log(spec.unk/(1-spec.unk)) + l
 artnetSort1$q.sens[artnetSort1$p_hiv == "Pos"] <- 0.01
 
 # P(Y*=y*|Y,X,R=0)
-artnetSort1$sens.xr <- NA
-artnetSort1$spec.xr <- NA
-
 artnetSort1$sens.xr <- (artnetSort1$p_hiv2.star1 * exp(artnetSort1$q.sens)) / (artnetSort1$p_hiv2.star0 + (artnetSort1$p_hiv2.star1 * exp(artnetSort1$q.sens)))
 artnetSort1$spec.xr <- (artnetSort1$p_hiv2.star0 * exp(artnetSort1$q.spec)) / (artnetSort1$p_hiv2.star1 + (artnetSort1$p_hiv2.star0 * exp(artnetSort1$q.spec)))
 
@@ -141,29 +119,12 @@ artnetSort1$spec.xr <- (artnetSort1$p_hiv2.star0 * exp(artnetSort1$q.spec)) / (a
 artnetSort1$p_hiv2.pred <- (artnetSort1$p_hiv2.star1 + artnetSort1$spec.xr - 1) / (artnetSort1$sens.xr + artnetSort1$spec.xr - 1)
 
 # p_hiv: imputed
-artnetSort1$p_hiv.imp <- NA
 artnetSort1$p_hiv.imp <- rbinom(nrow(artnetSort1),1,artnetSort1$p_hiv2.pred)
 
-table(artnetSort1$p_hiv, artnetSort1$p_hiv.imp)
-mean(artnetSort1$p_hiv2.pred)
-by(artnetSort1$p_hiv2.pred, artnetSort1$p_hiv, mean)
+prop.table(table(artnetSort1$p_hiv.imp))
+prop.table(table(artnetSort1$hiv2, artnetSort1$p_hiv.imp, useNA = "ifany"),1)
 
-
-# table(artnetSort1$p_hiv.imp)
-# 
-# table(artnetSort1$hiv2, artnetSort1$p_hiv.imp)
-# table(artnetSort1$prep.during.part2, artnetSort1$p_hiv.imp)
-# table(artnetSort1$prep.during.part2, artnetSort1$p_hiv)
-
-# artnetSort3 <- filter(artnetSort1, p_hiv == "Unk", hiv3 == "Pos")
-# by(artnetSort3$p_hiv2.pred, artnetSort3$ptype, mean)
-
-# table(artnetSort1$ptype, artnetSort1$p_age.cat_imp)
- 
-# table(artnetSort1$hiv2, artnetSort1$p_hiv.imp, artnetSort1$ptype)
-# table(artnetSort1$p_hiv, artnetSort1$p_hiv.imp, artnetSort1$ptype)
-# table(artnetSort1$p_hiv2, artnetSort1$p_hiv.imp, artnetSort1$prep.during.part2)
-
+# prop.table(table(artnetSort1$p_hiv, artnetSort1$p_hiv.imp),1)
 
 #### PrEP Sorting ------
 
@@ -171,7 +132,7 @@ by(artnetSort1$p_hiv2.pred, artnetSort1$p_hiv, mean)
 artnetSort2 <- artnetSort1 %>% filter(artnetSort1$p_hiv.imp == 0)
 
 # prep: set NA to UNK
-artnetSort2$prep.during.part2[is.na(artnetSort2$prep.during.part2)] <- "Unk"
+# artnetSort2$prep.during.part2[is.na(artnetSort2$prep.during.part2)] <- "Unk"
 
 # prep: unk set to NA
 artnetSort2$prep.part <- as.numeric(artnetSort2$prep.during.part2)
@@ -192,8 +153,7 @@ prep.pred.star <- inla.posterior.sample(n.imp, prep.inla)
 prep.pred.star[[1]]$latent[prep.pred.star[[1]]$latent > 0] <- -0.001
 
 ## P(prep* = 1)
-n.alters <- nrow(artnetSort2)
-artnetSort2$prep.star1 <- exp(prep.pred.star[[1]]$latent[1:n.alters])
+artnetSort2$prep.star1 <- exp(prep.pred.star[[1]]$latent[1:nrow(artnetSort2)])
 
 ## P(prep* = 0)
 artnetSort2$prep.star0 <- 1 - artnetSort2$prep.star1
@@ -246,9 +206,6 @@ artnetSort2$prep.q.spec[artnetSort2$prep.during.part2 == "Yes"] <- log(artnetSor
 artnetSort2$prep.q.spec[artnetSort2$prep.during.part2 == "Unk"] <- log(prep.spec.unk/(1-prep.spec.unk)) + log(prep.pi/(1-prep.pi))
 
 # P(Y*=y*|Y,X,R=0)
-artnetSort2$prep.sens.xr <- NA
-artnetSort2$prep.spec.xr <- NA
-
 artnetSort2$prep.sens.xr <- (artnetSort2$prep.star1 * exp(artnetSort2$prep.q.sens)) / (artnetSort2$prep.star0 + (artnetSort2$prep.star1 * exp(artnetSort2$prep.q.sens)))
 artnetSort2$prep.spec.xr <- (artnetSort2$prep.star0 * exp(artnetSort2$prep.q.spec)) / (artnetSort2$prep.star1 + (artnetSort2$prep.star0 * exp(artnetSort2$prep.q.spec)))
 
@@ -257,36 +214,18 @@ artnetSort2$prep.spec.xr <- (artnetSort2$prep.star0 * exp(artnetSort2$prep.q.spe
 artnetSort2$prep.pred <- (artnetSort2$prep.star1 + artnetSort2$prep.spec.xr - 1) / (artnetSort2$prep.sens.xr + artnetSort2$prep.spec.xr - 1)
 
 # prep: imputed
-artnetSort2$prep.imp <- NA
 artnetSort2$prep.imp <- rbinom(nrow(artnetSort2),1,artnetSort2$prep.pred)
 
-mean(artnetSort2$prep.pred)
-by(artnetSort2$prep.pred, artnetSort2$prep.during.part2, mean)
+artnetSort3 <- artnetSort2 %>% select(alter_id, prep.imp)
+artnetSort4 <- left_join(artnetSort1, artnetSort3, by = "alter_id")
 
-mean(artnetSort1$p_hiv2.pred)
-by(artnetSort1$p_hiv2.pred, artnetSort1$p_hiv, mean)
+#### Tables -----
+# prop.table(table(artnetSort4$p_hiv.imp))
+# prop.table(table(artnetSort4$hiv2, artnetSort4$p_hiv.imp, useNA = "ifany"),1)
+ 
+artnetSort4$prep.ego[!artnetSort4$prep.during.ego2 == "Yes"] <- 0
+artnetSort4$prep.ego[artnetSort4$prep.during.ego2 == "Yes"] <- 1
 
-check <- artnetSort1 %>% filter(!p_hiv == "Pos")
-by(check$p_hiv2.pred, check$prep.during.part2, mean)
-table(check$prep.during.part2, check$p_hiv)
-
-# by(artnetSort2$prep.star1, artnetSort2$prep.during.part2, mean)
-# 
-# table(artnetSort2$prep.during.part2, artnetSort2$ptype, useNA = "ifany")
-# 
-# check <- artnetSort2 %>% filter(artnetSort2$prep.during.part2 == "Yes")
-# by(check$prep.spec, check$ptype, mean)
-# 
-# table(artnetSort2$prep.during.part2, useNA = "ifany")
-# 
-# table(artnetSort1$hiv3, useNA = "ifany") # 9% of partnerships
-# table(artnetSort1$p_hiv.imp, useNA = "ifany") #11% of partnerships (changes with imputation)
-# 
-# table(artnetSort1$prep.during.ego2, useNA = "ifany") # 18% of partnerships
-# check <- artnetSort1 %>% filter(!p_hiv == "Pos")
-# table(check$prep.during.part2, check$p_hiv) #17.6% among neg, 2.3% among unk
-# table(check$prep.during.part2) #13% among all neg/unk
-# 
-# check <- artnetSort2 %>% filter(is.na(artnetSort2$prep.pred))
-# 
-# table(artnetSort2$prep.during.ego2, artnetSort2$prep.imp, useNA = "ifany")
+prop.table(table(artnetSort4$prep.imp))
+prop.table(table(artnetSort4$prep.ego[artnetSort4$hiv2 == 0], artnetSort4$p_hiv.imp[artnetSort4$hiv2 == 0]),1)
+prop.table(table(artnetSort4$prep.ego[artnetSort4$hiv2 == 0], artnetSort4$prep.imp[artnetSort4$hiv2 == 0]),1)
