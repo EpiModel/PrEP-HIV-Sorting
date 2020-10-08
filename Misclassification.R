@@ -54,20 +54,9 @@ p_hiv2.inla <- inla(p_hiv2 ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_i
 #### Drawing predictive values from posterior distribution ----
 n.imp <- 1
 p_hiv2.pred.star <- inla.posterior.sample(n.imp, p_hiv2.inla)
-p_hiv2.pred.star[[1]]$latent[p_hiv2.pred.star[[1]]$latent > 0] <- -0.001
-
-
-# p_hiv2.pred.star <- lapply(p_hiv2.pred.star, function(x) {
-#                         x$latent <- ifelse(x$latent > 0, -0.001, x$latent)
-#                         exp(x$latent)
-#                         })
-# 
-# p_hiv2.pred.star <- transpose(p_hiv2.pred.star)        
-
-
 
 # P(hiv2* = 1)
-artnetSort1$p_hiv2.star1 <- exp(p_hiv2.pred.star[[1]]$latent[1:nrow(artnetSort1)])
+artnetSort1$p_hiv2.star1 <- exp(p_hiv2.pred.star[[1]]$latent[1:nrow(artnetSort1)])/(1+exp(p_hiv2.pred.star[[1]]$latent[1:nrow(artnetSort1)]))
 
 ## P(hiv2* = 0)
 artnetSort1$p_hiv2.star0 <- 1 - artnetSort1$p_hiv2.star1
@@ -124,15 +113,13 @@ artnetSort1$p_hiv.imp <- rbinom(nrow(artnetSort1),1,artnetSort1$p_hiv2.pred)
 prop.table(table(artnetSort1$p_hiv.imp))
 prop.table(table(artnetSort1$hiv2, artnetSort1$p_hiv.imp, useNA = "ifany"),1)
 
-# prop.table(table(artnetSort1$p_hiv, artnetSort1$p_hiv.imp),1)
+prop.table(table(artnetSort1$p_hiv, artnetSort1$p_hiv.imp),1)
+table(artnetSort1$p_hiv, artnetSort1$p_hiv.imp)
 
 #### PrEP Sorting ------
 
 ## Data set
 artnetSort2 <- artnetSort1 %>% filter(artnetSort1$p_hiv.imp == 0)
-
-# prep: set NA to UNK
-# artnetSort2$prep.during.part2[is.na(artnetSort2$prep.during.part2)] <- "Unk"
 
 # prep: unk set to NA
 artnetSort2$prep.part <- as.numeric(artnetSort2$prep.during.part2)
@@ -150,10 +137,9 @@ prep.inla <- inla(prep.part ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_
 #### Drawing predictive values from posterior distribution ----
 n.imp <- 1
 prep.pred.star <- inla.posterior.sample(n.imp, prep.inla)
-prep.pred.star[[1]]$latent[prep.pred.star[[1]]$latent > 0] <- -0.001
 
 ## P(prep* = 1)
-artnetSort2$prep.star1 <- exp(prep.pred.star[[1]]$latent[1:nrow(artnetSort2)])
+artnetSort2$prep.star1 <- exp(prep.pred.star[[1]]$latent[1:nrow(artnetSort2)])/(1+exp(prep.pred.star[[1]]$latent[1:nrow(artnetSort2)]))
 
 ## P(prep* = 0)
 artnetSort2$prep.star0 <- 1 - artnetSort2$prep.star1
