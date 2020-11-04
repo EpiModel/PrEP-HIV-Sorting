@@ -18,7 +18,6 @@ artnetSort1$age.cat = factor(artnetSort1$age.cat)
 artnetSort1$race.cat = factor(artnetSort1$race.cat)
 artnetSort1$ptype = factor(artnetSort1$ptype,  labels = c("Main", "Casual", "Once"))
 
-
 ### Ego level variables
 
 # hiv2: 2 level variable from hiv3
