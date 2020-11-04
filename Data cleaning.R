@@ -14,12 +14,6 @@ artnet$age.cat[artnet$age >= 45 & artnet$age <= 54] <- "45-54"
 artnet$age.cat[artnet$age >= 55 & artnet$age <= 65] <- "55-65"
 artnet$age.cat[artnet$age > 65] <- "66+"
 
-# Ego Education
-artnet$education[artnet$HLEDUCAT %in% c(0, 1, 2)] <- "Less than High School"
-artnet$education[artnet$HLEDUCAT == 3] <- "High School Graduate"
-artnet$education[artnet$HLEDUCAT == 4] <- "Some College or Associates/Technical"
-artnet$education[artnet$HLEDUCAT == 5] <- "College or Greater"
-
 #### Long Data Set -----
 
 # Partner Age --- using imputed age
@@ -30,7 +24,6 @@ artnetLong$p_age.cat_imp[artnetLong$p_age_imp >= 45 & artnetLong$p_age_imp <= 54
 artnetLong$p_age.cat_imp[artnetLong$p_age_imp >= 55 & artnetLong$p_age_imp <= 65] <- "55-65"
 artnetLong$p_age.cat_imp[artnetLong$p_age_imp > 65] <- "66+"
 
-
 # Ego Age
 artnetLong$age.cat[artnetLong$age >= 15 & artnetLong$age <= 24] <- "15-24"
 artnetLong$age.cat[artnetLong$age >= 25 & artnetLong$age <= 34] <- "25-34"
@@ -39,9 +32,7 @@ artnetLong$age.cat[artnetLong$age >= 45 & artnetLong$age <= 54] <- "45-54"
 artnetLong$age.cat[artnetLong$age >= 55 & artnetLong$age <= 65] <- "55-65"
 artnetLong$age.cat[artnetLong$age > 65] <- "66+"
 
-# PrEP Use
-
-# Variables for each partner
+# PrEP and HIV for each partner
 p1.vars <- select(artnet, AMIS_ID, 
                   ONCE = PART1ONCE,
                   prep.ever.ego = PREP_REVISED,
@@ -99,31 +90,45 @@ pall.vars$ONCE <- NULL
 # Adding the new partner variables to artnetLong
 artnetLong <- inner_join(artnetLong, pall.vars, by = c("AMIS_ID", "PARTNER_ID"))
 
-#### Removing n = 947 alters with missing race
-artnetLong <- artnetLong[which(!is.na(artnetLong$p_race.cat)),]
+# Removing unnecessary objects
+rm(p1.vars, p2.vars, p3.vars, p4.vars, p5.vars, pall.vars)
 
-### Cleaning the crude variables
-## Egos' PrEP - Ever == 1 & Never == 0 during partnership; 0 for all HIV+ and HIV?; All missing among HIV- set to (2) unkown during partnership
-artnetLong$prep.during.ego2[artnetLong$hiv3 == 0 & is.na(artnetLong$prep.during.ego)] <- 2 # Missing set to Unknown
+#### Administrative variable to mark observations for deletion (1 == keep, 0 == remove)
+artnetLong$keep <- 1
+
+# Restricting to just anal sex
+artnetLong$keep[artnetLong$RAI == 0 & artnetLong$IAI == 0] <- 0
+artnetLong <- artnetLong[artnetLong$keep == 1,]
+
+#### Removing missing race
+artnetLong$keep[which(is.na(artnetLong$p_race.cat))] <- 0
+
+## Egos' PrEP, Ever == 1 & Never == 0 during partnership, 0 for all HIV+ and HIV?
+artnetLong$keep[artnetLong$hiv3 == 0 & is.na(artnetLong$prep.ever.ego)] <- 0 # Egos were inadvertently not asked about PrEP
+artnetLong$keep[artnetLong$prep.ever.ego == 1 & !artnetLong$prep.during.ego%in% c(1,2,3)] <- 0 # Missing info on prep.during.ego
+
 artnetLong$prep.during.ego2[artnetLong$prep.ever.ego == 0] <- 0 # Never PrEP set to Never During Partnership (was NA)
 artnetLong$prep.during.ego2[artnetLong$prep.during.ego == 3] <- 0 # No PrEP during
-artnetLong$prep.during.ego2[artnetLong$prep.during.ego == 88] <- 2 # I don't know
-artnetLong$prep.during.ego2[artnetLong$prep.during.ego == 99] <- 2 # Prefer not to say set to unknown
 artnetLong$prep.during.ego2[which(artnetLong$prep.during.ego %in% c(1,2))] <- 1 # Always or Sometimes PrEP
-artnetLong$prep.during.ego2[which(artnetLong$hiv3 %in% c(1,2))] <- 0 #All HIV+ and HIV-Unknown are missing PrEP (13 HIV-Unk have used PrEP before but missing for during partnership)
+artnetLong$prep.during.ego2[which(artnetLong$hiv3 %in% c(1,2))] <- 0 #All HIV+ and HIV-Unknown are missing PrEP
 
 ## Partners' HIV
-artnetLong$p_hiv[is.na(artnetLong$p_hiv)] <- 2 #Setting 20 NA to Unknown (2)
+artnetLong$keep[is.na(artnetLong$p_hiv)] <- 0 # p_hiv == NA
+artnetLong$keep[artnetLong$part_hiv == 99] <- 0 # "prefer not to say" for part_hiv
 
 ## Partners' PrEP
-artnetLong$prep.during.part2[artnetLong$p_hiv %in% c(0,2) & is.na(artnetLong$prep.during.part)] <- 2 # Missing set to Unknown
+artnetLong$keep[artnetLong$prep.during.part == 99] <- 0 #"prefer not to answer"
+artnetLong$keep[artnetLong$p_hiv %in% c(0,2) & is.na(artnetLong$prep.during.part)] <- 0 #prep.during.part == NA
+
 artnetLong$prep.during.part2[artnetLong$prep.during.part == 88] <- 2 # I don't know
-artnetLong$prep.during.part2[artnetLong$prep.during.part == 99] <- 2 # Prefer not to say
 artnetLong$prep.during.part2[artnetLong$prep.during.part == 3] <- 0 # No PrEP during
 artnetLong$prep.during.part2[which(artnetLong$prep.during.part %in% c(1,2))] <- 1 # Always or Sometimes PrEP
 artnetLong$prep.during.part2[artnetLong$p_hiv == 1] <- 0 # Set all HIV+ to No PrEP
 
-#### Dyads
+## Removing all of the observations marked for deletion
+artnetLong <- artnetLong[artnetLong$keep == 1,]
+
+#### Dyads for tables ----
 
 #HIV mixing
 artnetLong$d_hiv[artnetLong$hiv3 == 0 & artnetLong$p_hiv == 0] <- "NEGNEG"
@@ -248,7 +253,7 @@ artnetLong$d_hiv[artnetLong$hiv3 == 2 & artnetLong$p_hiv == 2] <- "UNKUNK"
 #### Changing to factors
 artnetLong$hiv3 = factor(artnetLong$hiv3, labels = c("Neg", "Pos", "Unk"))
 artnetLong$p_hiv = factor(artnetLong$p_hiv, labels = c("Neg", "Pos", "Unk"))
-artnetLong$prep.during.ego2 = factor(artnetLong$prep.during.ego2, labels = c("No", "Yes", "Unk"))
+artnetLong$prep.during.ego2 = factor(artnetLong$prep.during.ego2, labels = c("No", "Yes"))
 artnetLong$prep.during.part2 = factor(artnetLong$prep.during.part2, labels = c("No", "Yes", "Unk"))
 
 artnetLong$age.cat = factor(artnetLong$age.cat)
