@@ -98,7 +98,6 @@ artnetLong$keep <- 1
 
 # Restricting to just anal sex
 artnetLong$keep[artnetLong$RAI == 0 & artnetLong$IAI == 0] <- 0
-artnetLong <- artnetLong[artnetLong$keep == 1,]
 
 #### Removing missing race
 artnetLong$keep[which(is.na(artnetLong$p_race.cat))] <- 0
@@ -260,3 +259,31 @@ artnetLong$age.cat = factor(artnetLong$age.cat)
 artnetLong$race.cat = factor(artnetLong$race.cat)
 artnetLong$p_age.cat_imp = factor(artnetLong$p_age.cat_imp)
 artnetLong$p_race.cat = factor(artnetLong$p_race.cat)
+
+
+#### Starting dataset for imputations
+artnetSort <- artnetLong %>%
+        select(AMIS_ID, city2, ptype, 
+               hiv3, prep.during.ego2, race.cat, age.cat, 
+               p_hiv, prep.during.part2, p_race.cat, p_age.cat_imp)
+
+## Unique ID for each alter
+artnetSort$alter_id <- seq(1:nrow(artnetSort))
+
+# Covariates set to factor
+artnetSort$age.cat = factor(artnetSort$age.cat)
+artnetSort$race.cat = factor(artnetSort$race.cat)
+artnetSort$ptype = factor(artnetSort$ptype,  labels = c("Main", "Casual", "Once"))
+
+### Ego level variables
+
+# hiv2: 2 level variable from hiv3
+artnetSort$hiv2[artnetSort$hiv3 %in% c("Neg","Unk")] <- 0
+artnetSort$hiv2[artnetSort$hiv3 == "Pos"] <- 1
+
+### Partner level variables
+
+# p_hiv: 2 level (Neg == 0; Pos == 1; Unk == NA)
+artnetSort$p_hiv2 <- as.numeric(artnetSort$p_hiv)
+artnetSort$p_hiv2 = artnetSort$p_hiv2 - 1
+artnetSort$p_hiv2[artnetSort$p_hiv2 == 2] <- NA
