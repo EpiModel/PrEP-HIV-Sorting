@@ -33,17 +33,7 @@ artnetSort1$p_hiv2[artnetSort1$p_hiv2 == 2] <- NA
 
 #### Imputation models -----
 
-# This induces too strong of a relationship with hiv3 and the predictive values
-# p_hiv2.inla2 <- inla(p_hiv2 ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_imp +
-#                             age.cat + race.cat + age.cat:race.cat +
-#                             ptype + hiv3 + prep.during.ego2 +
-#                             ptype:hiv3 + ptype:prep.during.ego2 +
-#                             city2 + f(AMIS_ID, model = "iid"),
-#                     data = artnetSort1, family = "binomial",
-#                     control.predictor = list(link = 1, compute = TRUE),
-#                     control.compute = list(config = TRUE))
-
-p_hiv2.inla <- inla(p_hiv2 ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_imp +
+inla.hiv <- inla(p_hiv2 ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_imp +
                              age.cat + race.cat + age.cat:race.cat +
                              city2 + f(AMIS_ID, model = "iid"),
                      data = artnetSort1, family = "binomial",
@@ -51,8 +41,7 @@ p_hiv2.inla <- inla(p_hiv2 ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_i
                      control.compute = list(config = TRUE))
 
 #### Drawing predictive values from posterior distribution ----
-n.imp <- 1
-p_hiv2.pred.star <- inla.posterior.sample(n.imp, p_hiv2.inla)
+p_hiv2.pred.star <- inla.posterior.sample(1, inla.hiv)
 
 # P(hiv2* = 1)
 artnetSort1$p_hiv2.star1 <- exp(p_hiv2.pred.star[[1]]$latent[1:nrow(artnetSort1)])/(1+exp(p_hiv2.pred.star[[1]]$latent[1:nrow(artnetSort1)]))
@@ -165,7 +154,7 @@ prep.sens.add.once <- prep.sens.add.casual + runif(1, -0.04, -0.02)
 prep.sens.mult.ego.prep <- runif(1, 0, 1)
 prep.sens.mult.ego.hiv <- runif(1, 0, 1)
 
-artnetSort2$prep.sens.mult.ego.prep <- ifelse(artnetSort2$prep.during.ego2 == 1, prep.sens.mult.ego.prep, 1)
+artnetSort2$prep.sens.mult.ego.prep <- ifelse(artnetSort2$prep.during.ego2 == "Yes", prep.sens.mult.ego.prep, 1)
 artnetSort2$prep.sens.mult.ego.hiv <- ifelse(artnetSort2$hiv2 == 1, prep.sens.mult.ego.hiv, 1)
 
 # calculating target sens and spec
