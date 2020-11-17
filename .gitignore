@@ -37,3 +37,6 @@ vignettes/*.pdf
 # MAN Data
 MAN_Data/*.sas7bdat
 MAN_Data/*.sas7bcat
+
+# Imputation data
+*.rds
