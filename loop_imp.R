@@ -10,7 +10,7 @@ library("INLA")
 
 
 #### Initializing imputation lists ------
-nsim <- vector("double", 2)
+nsim <- vector("double", 100)
 
 imp.hiv <- vector("list", length(nsim))
 pred.star.hiv <- vector("list", length(nsim))
@@ -195,20 +195,4 @@ for (i in seq_along(nsim)) {
 
         saveRDS(imputations[[i]], file = paste("imp", i, ".rds", sep = ""))
         
-}        
-
-####################
-# sorting <- vector("list", length(nsim))
-# 
-# for (i in seq_along(nsim)) {
-#         sorting[[i]]$hiv.imp.n <- table(imputations[[i]]$p_hiv.imp)
-#         sorting[[i]]$hiv.imp.p <- prop.table(table(imputations[[i]]$p_hiv.imp))
-#         
-#         sorting[[i]]$hiv.reclass.n <- table(imputations[[i]]$p_hiv, imputations[[i]]$p_hiv.imp)
-#         sorting[[i]]$hiv.reclass.p <- prop.table(table(imputations[[i]]$p_hiv, imputations[[i]]$p_hiv.imp), 1)
-#         
-#         sorting[[i]]$hiv.sort.n <- table(imputations[[i]]$hiv2, imputations[[i]]$p_hiv.imp, useNA = "ifany")
-#         sorting[[i]]$hiv.sort.p <- prop.table(table(imputations[[i]]$hiv2, imputations[[i]]$p_hiv.imp, useNA = "ifany"), 1)
-#         
-#         
-# }
+}      
