@@ -1,76 +1,78 @@
 rm(list = ls())
+source('~/GitHub/PrEP-HIV-Sorting/Data cleaning.R')
 
-# List of all data sets
+
+# Compiling all reclassification dfs to a list
 dfs <- vector("list", 100)
 for (i in seq_along(1:100)) {
         dfs[[i]] <- readRDS(paste("imp", i, ".rds", sep = ""))
 }
 
-sorting <- vector("list", 100)
+### Reclassification analysis ----
+reclass <- vector("list", 100)
 
 for (i in seq_along(1:100)) {
         # HIV prevalence
-        sorting[[i]]$hiv.imp.n <- table(dfs[[i]]$p_hiv.imp)
-        sorting[[i]]$hiv.imp.p <- prop.table(table(dfs[[i]]$p_hiv.imp))
+        reclass[[i]]$hiv.imp.n <- table(dfs[[i]]$p_hiv.imp)
+        reclass[[i]]$hiv.imp.p <- prop.table(table(dfs[[i]]$p_hiv.imp))
 
         # HIV reclassification
-        sorting[[i]]$hiv.reclass.n <- table(dfs[[i]]$p_hiv, dfs[[i]]$p_hiv.imp)
-        sorting[[i]]$hiv.reclass.p <- prop.table(table(dfs[[i]]$p_hiv, dfs[[i]]$p_hiv.imp), 1)
+        reclass[[i]]$hiv.reclass.n <- table(dfs[[i]]$p_hiv, dfs[[i]]$p_hiv.imp)
+        reclass[[i]]$hiv.reclass.p <- prop.table(table(dfs[[i]]$p_hiv, dfs[[i]]$p_hiv.imp), 1)
 
         # HIV-HIV sorting
-        sorting[[i]]$hh.sort.n <- table(dfs[[i]]$hiv2, dfs[[i]]$p_hiv.imp)
-        sorting[[i]]$hh.sort.p <- prop.table(table(dfs[[i]]$hiv2, dfs[[i]]$p_hiv.imp), 1)
+        reclass[[i]]$hh.sort.n <- table(dfs[[i]]$hiv2, dfs[[i]]$p_hiv.imp)
+        reclass[[i]]$hh.sort.p <- prop.table(table(dfs[[i]]$hiv2, dfs[[i]]$p_hiv.imp), 1)
 
         # PrEP prevalence, given neg/unk
-        sorting[[i]]$prep.imp.n <- table(dfs[[i]]$prep.imp)
-        sorting[[i]]$prep.imp.p <- prop.table(table(dfs[[i]]$prep.imp))
+        reclass[[i]]$prep.imp.n <- table(dfs[[i]]$prep.imp)
+        reclass[[i]]$prep.imp.p <- prop.table(table(dfs[[i]]$prep.imp))
         
         # PrEP reclassification
-        sorting[[i]]$prep.reclass.n <- table(dfs[[i]]$prep.during.part2, dfs[[i]]$prep.imp)
-        sorting[[i]]$prep.reclass.p <- prop.table(table(dfs[[i]]$prep.during.part2, dfs[[i]]$prep.imp), 1)
+        reclass[[i]]$prep.reclass.n <- table(dfs[[i]]$prep.during.part2, dfs[[i]]$prep.imp)
+        reclass[[i]]$prep.reclass.p <- prop.table(table(dfs[[i]]$prep.during.part2, dfs[[i]]$prep.imp), 1)
         
         # HIV-PrEP sorting
-        sorting[[i]]$hp.sort.n <- table(dfs[[i]]$hiv2, dfs[[i]]$prep.imp)
-        sorting[[i]]$hp.sort.p <- prop.table(table(dfs[[i]]$hiv2, dfs[[i]]$prep.imp),1)
+        reclass[[i]]$hp.sort.n <- table(dfs[[i]]$hiv2, dfs[[i]]$prep.imp)
+        reclass[[i]]$hp.sort.p <- prop.table(table(dfs[[i]]$hiv2, dfs[[i]]$prep.imp),1)
         
         # PrEP-PrEP sorting
-        sorting[[i]]$pp.sort.n <- table(dfs[[i]]$prep.during.ego2[dfs[[i]]$hiv2 == 0], dfs[[i]]$prep.imp[dfs[[i]]$hiv2 == 0])
-        sorting[[i]]$pp.sort.p <- prop.table(table(dfs[[i]]$prep.during.ego2[dfs[[i]]$hiv2 == 0], dfs[[i]]$prep.imp[dfs[[i]]$hiv2 == 0]), 1)
+        reclass[[i]]$pp.sort.n <- table(dfs[[i]]$prep.during.ego2[dfs[[i]]$hiv2 == 0], dfs[[i]]$prep.imp[dfs[[i]]$hiv2 == 0])
+        reclass[[i]]$pp.sort.p <- prop.table(table(dfs[[i]]$prep.during.ego2[dfs[[i]]$hiv2 == 0], dfs[[i]]$prep.imp[dfs[[i]]$hiv2 == 0]), 1)
 }
 
-listVec <- lapply(sorting, c, recursive=TRUE)
-sorting.results <- as.data.frame(do.call(rbind, listVec))
-as.data.frame(sorting.results)
+listVec <- lapply(reclass, c, recursive=TRUE)
+reclass.results <- as.data.frame(do.call(rbind, listVec))
 
-results <- function(x) {
-        q <- select(sorting.results, starts_with(x))
-        return(t(apply(q, 2, quantile, probs = c(0, 0.025, 0.5, 0.975, 1), na.rm = FALSE)))
+results <- function(dat, x) {
+        q <- select(dat, starts_with(x))
+        return(t(apply(q, 2, quantile, probs = c(0.025, 0.5, 0.975), na.rm = FALSE)))
 }
 
-# HIV prevalence
-results("hiv.imp.n")
-results("hiv.imp.p")
-
-# HIV reclassification 
-results("hiv.reclass.n")
-results("hiv.reclass.p")
-
-# HIV-HIV sorting
-results("hh.sort.n")
-results("hh.sort.p")
-
-# PrEP prevalence among HIV -/?
-results("prep.imp.n")
-results("prep.imp.p")
-
-# PrEP reclassification
-results("prep.reclass.n")
-results("prep.reclass.p")
-
-# HIV-PrEP sorting
-results("hp.sort.n")
-results("hp.sort.p")
-
-# PrEP-PrEP sorting
-results("pp.sort.n")
-results("pp.sort.p")
+# # HIV prevalence
+# results(dat = reclass.results, x = "hiv.imp.n")
+# results(dat = reclass.results, x = "hiv.imp.p")
+# 
+# # HIV reclassification 
+# results(dat = reclass.results, x = "hiv.reclass.n")
+# results(dat = reclass.results, x = "hiv.reclass.p")
+# 
+# # HIV-HIV sorting
+# results(dat = reclass.results, x = "hh.sort.n")
+# results(dat = reclass.results, x = "hh.sort.p")
+# 
+# # PrEP prevalence among HIV -/?
+# results(dat = reclass.results, x = "prep.imp.n")
+# results(dat = reclass.results, x = "prep.imp.p")
+# 
+# # PrEP reclassification
+# results(dat = reclass.results, x = "prep.reclass.n")
+# results(dat = reclass.results, x = "prep.reclass.p")
+# 
+# # HIV-PrEP sorting
+# results(dat = reclass.results, x = "hp.sort.n")
+# results(dat = reclass.results, x = "hp.sort.p")
+# 
+# # PrEP-PrEP sorting
+# results(dat = reclass.results, x = "pp.sort.n")
+# results(dat = reclass.results, x = "pp.sort.p")
