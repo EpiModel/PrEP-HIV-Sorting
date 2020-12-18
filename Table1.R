@@ -1,76 +1,91 @@
+# Table 1: Ego and dyad level characteristics
+# By Kevin Maloney (kevin.maloney@emory.edu)
+# 2020-11-30
+
+rm(list = ls())
 source('~/GitHub/PrEP-HIV-Sorting/Data cleaning.R')
 
-# Lists the column names
-# names(artnet)
+IDs <- artnetSort %>% select(AMIS_ID) %>% unique()
+t1_egos <- left_join(IDs, artnet, by = "AMIS_ID")
 
-###Table 1 - Demographic Characteristics
+# Titles
+t1.title <- vector("character", 7)
+t1.title[1] <- "Table 1. Sample Characteristics"
+
+t1.groupname <- vector("character", 7) 
+t1.groupname[2] <- "Respondent-level"
+t1.groupname[4] <- "Partnership-level"
+
+t1.colname <- c("Category", "Respondents N", "Respondents %", "Respondents N", "Respondents %", "Partners N", "Partners %")
 
 # Total Sample
-total <- cbind("Total",
-               nrow(artnet), nrow(artnet) / nrow(artnet),
+t1.total <- cbind("Total",
+               nrow(t1_egos), nrow(t1_egos) / nrow(t1_egos),
+               nrow(artnetLong), nrow(artnetLong) / nrow(artnetLong),
                nrow(artnetLong), nrow(artnetLong) / nrow(artnetLong)
                )
 
 # Age Category
-a <- artnet %>% count(age.cat)
-age.ego <- cbind(cbind(c(a$age.cat[1], a$age.cat[2], a$age.cat[3],
-                        a$age.cat[4], a$age.cat[5], "66+")),
-                cbind(c(a$n[1], a$n[2], a$n[3], a$n[4], a$n[5],
-                        ifelse(length(which(artnet$age.cat == "66+")) > 0, a$n[6], 0))),
-                cbind(rbind((100 * a$n[1] / sum(a$n)),
-                            (100 * a$n[2] / sum(a$n)),
-                            (100 * a$n[3] / sum(a$n)),
-                            (100 * a$n[4] / sum(a$n)),
-                            (100 * a$n[5] / sum(a$n)),
-                            (100 * a$n[6] / sum(a$n)))))
+a <- t1_egos %>% count(age.cat) %>% mutate(perc = round(100*n/sum(n), 1))
+b <- artnetSort %>% count(age.cat) %>% mutate(perc = round(100*n/sum(n), 1))
+c <- artnetSort %>% count(p_age.cat_imp) %>% mutate(perc = round(100*n/sum(n), 1))
 
-# Using imputed age
-b <- artnetLong %>% count(p_age.cat_imp)
-age.part <- cbind(cbind(c(b$n[1], b$n[2], b$n[3], b$n[4], b$n[5],
-                         ifelse(length(which(artnetLong$p_age.cat_imp == "66+")) > 0, b$n[6], 0))),
-                 cbind(rbind((100 * b$n[1] / sum(b$n)),
-                             (100 * b$n[2] / sum(b$n)),
-                             (100 * b$n[3] / sum(b$n)),
-                             (100 * b$n[4] / sum(b$n)),
-                             (100 * b$n[5] / sum(b$n)),
-                             (100 * b$n[6] / sum(b$n)))))
+t1.age <- rbind(
+                cbind("Age category", "", "", "", "", "", ""),
+                cbind("15-24", a$n[1], a$perc[1], b$n[1], b$perc[1], c$n[1], c$perc[1]),
+                cbind("25-34", a$n[2], a$perc[2], b$n[2], b$perc[2], c$n[2], c$perc[2]),
+                cbind("35-44", a$n[3], a$perc[3], b$n[3], b$perc[3], c$n[3], c$perc[3]),
+                cbind("45-54", a$n[4], a$perc[4], b$n[4], b$perc[4], c$n[4], c$perc[4]),
+                cbind("55-65", a$n[5], a$perc[5], b$n[5], b$perc[5], c$n[5], c$perc[5]),
+                cbind("66+", "0", "---", "0", "---", c$n[6], c$perc[6])
+                )
 
 # Race/ethnicity
-a <- artnet %>% count(race.cat)
-race.ego <- cbind(cbind(c(a$race.cat[1], a$race.cat[4], a$race.cat[2], a$race.cat[3])),
-                 cbind(c(a$n[1], a$n[4], a$n[2], a$n[3])),
-                 cbind(rbind((100 * a$n[1] / sum(a$n)),
-                             (100 * a$n[4] / sum(a$n)),
-                             (100 * a$n[2] / sum(a$n)),
-                             (100 * a$n[3] / sum(a$n)))))
+a <- t1_egos %>% count(race.cat) %>% mutate(perc = round(100*n/sum(n), 1))
+b <- artnetSort %>% count(race.cat) %>% mutate(perc = round(100*n/sum(n), 1))
+c <- artnetSort %>% count(p_race.cat) %>% mutate(perc = round(100*n/sum(n), 1))
 
-b <- artnetLong %>% count(p_race.cat)
-race.part <- cbind(cbind(c(b$n[1], b$n[4], b$n[2], b$n[3])),
-                 cbind(rbind((100 * b$n[1] / sum(b$n)),
-                             (100 * b$n[4] / sum(b$n)),
-                             (100 * b$n[2] / sum(b$n)),
-                             (100 * b$n[3] / sum(b$n)))))
+t1.race <- rbind(
+        cbind("Race/ ethnicity", "", "", "", "", "", ""),
+        cbind("Non-Hispanic black", a$n[1], a$perc[1], b$n[1], b$perc[1], c$n[1], c$perc[1]),
+        cbind("Non-Hispanic white", a$n[4], a$perc[4], b$n[4], b$perc[4], c$n[4], c$perc[4]),
+        cbind("Hispanic/ Latinx", a$n[2], a$perc[2], b$n[2], b$perc[2], c$n[2], c$perc[2]),
+        cbind("Other", a$n[3], a$perc[3], b$n[3], b$perc[3], c$n[3], c$perc[3])
+        )
 
 # HIV
-a <- artnet %>% count(hiv3)
-hiv.ego <- cbind(cbind(c("Negative", "Positive", "Unknown", NA)),
-                 cbind(c(a$n[1], a$n[2], a$n[3], NA)), #a$n[4]),
-                 cbind(rbind((100 * a$n[1] / sum(a$n[1:3])),
-                             (100 * a$n[2] / sum(a$n[1:3])),
-                             (100 * a$n[3] / sum(a$n[1:3])),
-                             NA)))
+a <- t1_egos %>% count(hiv3) %>% mutate(perc = round(100*n/sum(n), 1))
+b <- artnetSort %>% count(hiv3) %>% mutate(perc = round(100*n/sum(n), 1))
+c <- artnetSort %>% count(p_hiv) %>% mutate(perc = round(100*n/sum(n), 1))
 
-b <- artnetLong %>% count(p_hiv)
-hiv.part <- cbind(cbind(c(b$n[1], b$n[2], b$n[3], b$n[4])), #b$n[4]),
-                 cbind(rbind((100 * b$n[1] / sum(b$n[1:3])),
-                             (100 * b$n[2] / sum(b$n[1:3])),
-                             (100 * b$n[3] / sum(b$n[1:3])),
-                             NA)))
+t1.hiv <- rbind(
+        cbind("HIV status", "", "", "", "", "", ""),
+        cbind("Negative", a$n[1], a$perc[1], b$n[1], b$perc[1], c$n[1], c$perc[1]),
+        cbind("Diagnosed HIV", a$n[2], a$perc[2], b$n[2], b$perc[2], c$n[2], c$perc[2]),
+        cbind("Unknown HIV", a$n[3], a$perc[3], b$n[3], b$perc[3], c$n[3], c$perc[3])
+        )
 
-table1 <- rbind(total,
-                cbind(age.ego, age.part),
-                cbind(race.ego, race.part),
-                cbind(hiv.ego, hiv.part)
-                )
-colnames(table1) <- c("Category", "Egos N", "Egos %", "Partners N", "Partners %")
+# PrEP
+b <- artnetSort %>% filter(!hiv3 == "Pos") %>% count(prep.during.ego2) %>% mutate(perc = round(100*n/sum(n), 1))
+c <- artnetSort %>% filter(!p_hiv == "Pos") %>% count(prep.during.part2) %>% mutate(perc = round(100*n/sum(n), 1))
+
+t1.prep <- rbind(
+        cbind("PrEP use during partnership", "", "", "", "", "", ""),
+        cbind("Never", "---", "---", b$n[1], b$perc[1], c$n[1], c$perc[1]),
+        cbind("Ever", "---", "---", b$n[2], b$perc[2], c$n[2], c$perc[2]),
+        cbind("Unknown", "---", "---", "---", "---", c$n[3], c$perc[3])
+        )
+
+# Partnership type
+c <- artnetSort %>% count(ptype) %>% mutate(perc = round(100*n/sum(n), 1))
+
+t1.ptype <- rbind(
+        cbind("Partnership type", "", "", "", "", "", ""),
+        cbind("Main", "---", "---", "---", "---", c$n[1], c$perc[1]),
+        cbind("Casual", "---", "---", "---", "---", c$n[2], c$perc[2]),
+        cbind("One-time", "---", "---", "---", "---", c$n[3], c$perc[3])
+        )
+
+table1 <- rbind(t1.title, t1.groupname, t1.colname, t1.total, t1.age, t1.race, t1.hiv, t1.prep, t1.ptype)
+
 write.csv(table1, file = "aim1_table1.csv")

@@ -102,7 +102,7 @@ artnetLong$keep[artnetLong$RAI == 0 & artnetLong$IAI == 0] <- 0
 #### Removing missing race
 artnetLong$keep[which(is.na(artnetLong$p_race.cat))] <- 0
 
-## Egos' PrEP, Ever == 1 & Never == 0 during partnership, 0 for all HIV+ and HIV?
+## Egos' PrEP during partnership, Ever == 1 & Never == 0, 0 for all HIV+ and HIV?
 artnetLong$keep[artnetLong$hiv3 == 0 & is.na(artnetLong$prep.ever.ego)] <- 0 # Egos were inadvertently not asked about PrEP
 artnetLong$keep[artnetLong$prep.ever.ego == 1 & !artnetLong$prep.during.ego%in% c(1,2,3)] <- 0 # Missing info on prep.during.ego
 
