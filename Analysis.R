@@ -48,6 +48,10 @@ for (i in seq_along(1:100)) {
         reclass[[i]]$pp.sort.n <- table(dfs[[i]]$prep.during.ego2[dfs[[i]]$hiv2 == 0], dfs[[i]]$prep.imp[dfs[[i]]$hiv2 == 0])
         reclass[[i]]$pp.sort.p <- prop.table(table(dfs[[i]]$prep.during.ego2[dfs[[i]]$hiv2 == 0], dfs[[i]]$prep.imp[dfs[[i]]$hiv2 == 0]), 1)
         
+        # PrEP-HIV sorting
+        reclass[[i]]$ph.sort.n <- table(dfs[[i]]$prep.during.ego2[dfs[[i]]$hiv2 == 0], dfs[[i]]$p_hiv.imp[dfs[[i]]$hiv2 == 0])
+        reclass[[i]]$ph.sort.p <- prop.table(table(dfs[[i]]$prep.during.ego2[dfs[[i]]$hiv2 == 0], dfs[[i]]$p_hiv.imp[dfs[[i]]$hiv2 == 0]), 1)
+        
 }
 
 listVec <- lapply(reclass, c, recursive=TRUE)
@@ -90,3 +94,6 @@ results <- function(dat, x) {
 # results(dat = reclass.results, x = "pp.sort.n")
 # results(dat = reclass.results, x = "pp.sort.p")
 
+# # PrEP-HIV sorting
+# results(dat = reclass.results, x = "ph.sort.n")
+# results(dat = reclass.results, x = "ph.sort.p")
