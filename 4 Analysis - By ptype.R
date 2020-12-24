@@ -13,7 +13,14 @@ reclass <- vector("list", 100)
 
 for (i in seq_along(1:100)) {
         
-        dfs[[i]] <- dfs[[i]] %>% filter(ptype == "Main" | ptype == "Casual")
+        dfs[[i]] <- dfs[[i]] %>% filter(ptype == "Once")
+
+        dfs[[i]] <- dfs[[i]] %>% 
+                mutate(hiv.prep = ifelse(hiv2 == 1, 1, ifelse(prep.during.ego2 == "No",0,2)),
+                        hiv.prep_p = ifelse(p_hiv.imp == 1, 1, ifelse(prep.imp == 0,0,2)))
+                
+        # Expected Table Counts for Aim 2
+        reclass[[i]]$hiv.prep.mix <- table(dfs[[i]]$hiv.prep, dfs[[i]]$hiv.prep_p)
         
         # HIV prevalence
         reclass[[i]]$hiv.imp.n <- table(dfs[[i]]$p_hiv.imp)
@@ -64,6 +71,9 @@ results <- function(dat, x) {
         q <- select(dat, starts_with(x))
         return(t(apply(q, 2, quantile, probs = c(0.025, 0.5, 0.975), na.rm = FALSE)))
 }
+
+# # HIV-PrEP Mixing - expected counts for Aim 2
+results(dat = reclass.results, x = "hiv.prep.mix")
 
 # # HIV prevalence
 # results(dat = reclass.results, x = "hiv.imp.n")
