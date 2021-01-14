@@ -3,7 +3,7 @@
 # 2020-11-30
 
 rm(list = ls())
-source('~/GitHub/PrEP-HIV-Sorting/Data cleaning.R')
+source('~/GitHub/PrEP-HIV-Sorting/1 Data cleaning.R')
 
 IDs <- artnetSort %>% select(AMIS_ID) %>% unique()
 t1_egos <- left_join(IDs, artnet, by = "AMIS_ID")

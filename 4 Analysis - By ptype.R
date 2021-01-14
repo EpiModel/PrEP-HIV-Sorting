@@ -13,7 +13,7 @@ reclass <- vector("list", 100)
 
 for (i in seq_along(1:100)) {
         
-        dfs[[i]] <- dfs[[i]] %>% filter(ptype == "Once")
+        dfs[[i]] <- dfs[[i]] %>% filter(p_age.cat_imp == "55-65")
 
         dfs[[i]] <- dfs[[i]] %>% 
                 mutate(hiv.prep = ifelse(hiv2 == 1, 1, ifelse(prep.during.ego2 == "No",0,2)),
@@ -73,15 +73,15 @@ results <- function(dat, x) {
 }
 
 # # HIV-PrEP Mixing - expected counts for Aim 2
-results(dat = reclass.results, x = "hiv.prep.mix")
+# results(dat = reclass.results, x = "hiv.prep.mix")
 
 # # HIV prevalence
 # results(dat = reclass.results, x = "hiv.imp.n")
-# results(dat = reclass.results, x = "hiv.imp.p")
+ results(dat = reclass.results, x = "hiv.imp.p")
 # 
 # # HIV reclassification 
 # results(dat = reclass.results, x = "hiv.reclass.n")
-# results(dat = reclass.results, x = "hiv.reclass.p")
+ results(dat = reclass.results, x = "hiv.reclass.p")
 # 
 # # HIV-HIV sorting
 # results(dat = reclass.results, x = "hh.sort.n")
@@ -89,11 +89,11 @@ results(dat = reclass.results, x = "hiv.prep.mix")
 # 
 # # PrEP prevalence among HIV -/?
 # results(dat = reclass.results, x = "prep.imp.n")
-# results(dat = reclass.results, x = "prep.imp.p")
+ results(dat = reclass.results, x = "prep.imp.p")
 # 
 # # PrEP reclassification
 # results(dat = reclass.results, x = "prep.reclass.n")
-# results(dat = reclass.results, x = "prep.reclass.p")
+ results(dat = reclass.results, x = "prep.reclass.p")
 # 
 # # HIV prevalence among egos, given partner is HIV -/?
 # results(dat = reclass.results, x = "ehiv.pneg.n")
@@ -110,3 +110,14 @@ results(dat = reclass.results, x = "hiv.prep.mix")
 # # PrEP-HIV sorting
 # results(dat = reclass.results, x = "ph.sort.n")
 # results(dat = reclass.results, x = "ph.sort.p")
+
+pres <- artnetSort %>%
+        mutate(hiv.prep = ifelse(hiv3 == "Pos", "Pos", 
+                                 ifelse(hiv3 == "Unk", "Unk",
+                                        ifelse(prep.during.ego2 == "No", "No PrEP", "PrEP")))) %>%
+        mutate(hiv.prep.p = ifelse(p_hiv == "Pos", "Pos", 
+                                 ifelse(p_hiv == "Unk", "Unk",
+                                        ifelse(prep.during.part2 == "No", "No PrEP", "PrEP"))))
+        
+
+prop.table(table(pres$hiv.prep, pres$hiv.prep.p, useNA = "ifany"),1)

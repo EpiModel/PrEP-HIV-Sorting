@@ -5,12 +5,12 @@
 
 rm(list = ls())
 
-source('~/GitHub/PrEP-HIV-Sorting/Data cleaning.R')
+source('~/GitHub/PrEP-HIV-Sorting/1 Data cleaning.R')
 library("INLA")
 
 
 #### Initializing imputation lists ------
-nsim <- vector("double", 100)
+nsim <- vector("double", 300)
 
 imp.hiv <- vector("list", length(nsim))
 pred.star.hiv <- vector("list", length(nsim))
@@ -193,6 +193,6 @@ for (i in seq_along(nsim)) {
         
         imputations[[i]] <- left_join(imp.hiv[[i]], imp.prep[[i]], by = "alter_id")
 
-        saveRDS(imputations[[i]], file = paste("imp", i, ".rds", sep = ""))
+        saveRDS(imputations[[i]], file = paste("imp", i+203, ".rds", sep = ""))
         
 }      
