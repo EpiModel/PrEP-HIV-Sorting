@@ -5,7 +5,7 @@
 
 rm(list = ls())
 
-source('~/GitHub/PrEP-HIV-Sorting/Analysis.R')
+source('~/GitHub/PrEP-HIV-Sorting/3 Analysis.R')
 
 t3.title <- vector("character", 9)
 t3.title[1] <- "Table 3. HIV-HIV Sorting"
@@ -67,6 +67,3 @@ t3.r <- rbind(
 table3 <- rbind(t3.title, t3.colname.a, t3.colname.b, t3.colname.c, t3.w, t3.c, t3.r)
 
 write.csv(table3, file = "aim1_table3_HH.csv")
-
-table(artnetSort$hiv3, artnetSort$p_hiv, useNA = "ifany")
-prop.table(table(artnetSort$hiv3, artnetSort$p_hiv, useNA = "ifany"), 1)

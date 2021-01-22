@@ -3,17 +3,17 @@ source('~/GitHub/PrEP-HIV-Sorting/1 Data cleaning.R')
 
 
 # Compiling all reclassification dfs to a list
-dfs <- vector("list", 100)
-for (i in seq_along(1:100)) {
+dfs <- vector("list", 300)
+for (i in seq_along(1:300)) {
         dfs[[i]] <- readRDS(paste("imp", i, ".rds", sep = ""))
 }
 
 ### Reclassification analysis ----
-reclass <- vector("list", 100)
+reclass <- vector("list", 300)
 
-for (i in seq_along(1:100)) {
+for (i in seq_along(1:300)) {
         
-        dfs[[i]] <- dfs[[i]] %>% filter(p_age.cat_imp == "55-65")
+        dfs[[i]] <- dfs[[i]] %>% filter(ptype == "Main" | ptype == "Casual")
 
         dfs[[i]] <- dfs[[i]] %>% 
                 mutate(hiv.prep = ifelse(hiv2 == 1, 1, ifelse(prep.during.ego2 == "No",0,2)),
@@ -73,7 +73,7 @@ results <- function(dat, x) {
 }
 
 # # HIV-PrEP Mixing - expected counts for Aim 2
-# results(dat = reclass.results, x = "hiv.prep.mix")
+results(dat = reclass.results, x = "hiv.prep.mix")
 
 # # HIV prevalence
 # results(dat = reclass.results, x = "hiv.imp.n")
