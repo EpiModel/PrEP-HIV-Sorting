@@ -1,12 +1,14 @@
 # Corrects bias due to misclassification and unknown values in egocentric data
 # Required: data cleaning.R
 # By Kevin Maloney (kevin.maloney@emory.edu)
-# 2020-11-13
+# 2021-02-24
 
 rm(list = ls())
 
 source('~/GitHub/PrEP-HIV-Sorting/1 Data cleaning.R')
 library("INLA")
+
+rm(artnet, artnetLong)
 
 
 #### Initializing imputation lists ------
@@ -26,6 +28,7 @@ imputations <- vector("list", length(nsim))
 #### HIV INLA ------
 inla.hiv <- inla(p_hiv2 ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_imp +
                          age.cat + race.cat + age.cat:race.cat +
+                         ptype + hp + ptype:hp +
                          city2 + f(AMIS_ID, model = "iid"),
                  data = artnetSort, family = "binomial",
                  control.predictor = list(link = 1, compute = TRUE),
@@ -108,6 +111,7 @@ for (i in seq_along(nsim)) {
         # Imputation model
         inla.prep[[i]] <- inla(prep.part ~ p_race.cat + p_age.cat_imp + p_race.cat:p_age.cat_imp +
                                   age.cat + race.cat + age.cat:race.cat +
+                                  ptype + hp + ptype:hp +
                                   city2 + f(AMIS_ID, model = "iid"),
                           data = imp.prep[[i]], family = "binomial",
                           control.predictor = list(link = 1, compute = TRUE),
@@ -193,6 +197,17 @@ for (i in seq_along(nsim)) {
         
         imputations[[i]] <- left_join(imp.hiv[[i]], imp.prep[[i]], by = "alter_id")
 
-        saveRDS(imputations[[i]], file = paste("imp", i+203, ".rds", sep = ""))
+        saveRDS(imputations[[i]], file = paste("imp", i, ".rds", sep = ""))
+        
+        imp.hiv <- vector("list", length(nsim))
+        pred.star.hiv <- vector("list", length(nsim))
+        rv.hiv <- vector("list", length(nsim))
+        
+        imp.prep <- vector("list", length(nsim))
+        inla.prep <- vector("list", length(nsim))
+        pred.star.prep <- vector("list", length(nsim))
+        rv.prep <- vector("list", length(nsim))
+        
+        imputations <- vector("list", length(nsim))
         
 }      

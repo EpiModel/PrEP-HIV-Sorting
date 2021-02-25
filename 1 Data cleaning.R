@@ -158,6 +158,12 @@ artnetSort$ptype = factor(artnetSort$ptype,  labels = c("Main", "Casual", "Once"
 artnetSort$hiv2[artnetSort$hiv3 %in% c("Neg","Unk")] <- 0
 artnetSort$hiv2[artnetSort$hiv3 == "Pos"] <- 1
 
+# hiv and PrEP
+artnetSort$hp[artnetSort$hiv3 == "Pos"] <- "Pos"
+artnetSort$hp[artnetSort$hiv3 == "Unk"] <- "Unk"
+artnetSort$hp[artnetSort$hiv3 == "Neg" & artnetSort$prep.during.ego2 == "No"] <- "NoPrEP"
+artnetSort$hp[artnetSort$hiv3 == "Neg" & artnetSort$prep.during.ego2 == "Yes"] <- "PrEP"
+
 ### Partner level variables
 
 # p_hiv: 2 level (Neg == 0; Pos == 1; Unk == NA)
