@@ -1,107 +1,194 @@
-c <- ggplot(reclass.results, aes(hiv.imp.p.1))
-d <- c + geom_histogram(binwidth = 0.0025)
-c + geom_area(stat="bin")
+# Figures showing mixing patterns
+# By Kevin Maloney (kevin.maloney@emory.edu)
+# 2021-02-25
 
-e <- ggplot(reclass.results, aes(prep.imp.p.1))
-e + geom_histogram(binwidth = 0.0025)
-e + geom_area(stat="bin")
+library("tidyverse")
+library("ggpubr")
+library("viridis")
+library("gridExtra")
 
-## Marginal Distributions ---- 
-dfs <- vector("list", 300)
-for (i in seq_along(1:300)) {
-        dfs[[i]] <- readRDS(paste("imp", i, ".rds", sep = ""))
-}
+source('~/GitHub/PrEP-HIV-Sorting/3 Analysis.R')
+rm(artnet, artnetLong)
 
-glm.hiv <- vector("list", 300)
-marg.hiv <- vector("list", 300)
+mycol4 <- viridis(4)
+mycol.ss.full <- c(mycol4[4], mycol4[2:3])
+mycol.ss.cc <- c(mycol4[2:3])
+mycol.ss.re <- c(mycol4[1], mycol4[3])
+
+mycol.ps.full <- c(mycol4[4], mycol4[1:3])
+mycol.ps.cc <- c(mycol4[1:3])
+
+### Serosorting ----
+
+## Full sample
+ss.table <- prop.table(table(artnetSort$hiv3, artnetSort$p_hiv, useNA = "ifany"), 1)
+ego <- factor(rep(c("Diagnosed HIV\n(11.2%)", "Test-negative\n(76.4%)", "HIV unknown\n(12.3%)"), each = 3),
+                 levels = c("Test-negative\n(76.4%)", "Diagnosed HIV\n(11.2%)", "HIV unknown\n(12.3%)"))
+part <- rep(c("Diagnosed HIV", "Test-negative", "HIV unknown"), times = 3)
+perc <- c(ss.table[2,2], ss.table[2,1], ss.table[2,3],
+             ss.table[1,2], ss.table[1,1], ss.table[1,3],
+             ss.table[3,2], ss.table[3,1], ss.table[3,3])
+ss.full.df <- data.frame(ego, part, perc)
+rm(ego, part, perc, ss.table)
+
+(ss.full <- ggplot(ss.full.df, aes(x = ego, y = perc, 
+                fill = factor(part, levels = c("HIV unknown", "Test-negative", "Diagnosed HIV")))) +
+        geom_bar(stat = "identity") +
+        scale_y_continuous(labels = scales::percent)) +
+        geom_label(aes(label = scales::percent(perc, accuracy = 0.1)), 
+                  position = position_stack(vjust = 0.5),
+                  show.legend = FALSE, fill = "white") +
+        labs(fill = "HIV among partners",
+             title = "Serosorting based on respondent knowledge",
+             x = "Respondents") +
+        theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+              axis.title.y = element_blank(),
+              text = element_text(size = 12),
+              strip.text = element_text(size = 12),
+              legend.position = "right") +
+        scale_fill_manual(values = mycol.ss.full)
+
+## Complete-case analysis
+cc.df <- artnetSort %>% filter(!p_hiv == "Unk", !hiv3 == "Unk")
+ss.table <- prop.table(table(cc.df$hiv3, cc.df$p_hiv, useNA = "ifany"), 1)
+ego <- factor(rep(c("Diagnosed HIV\n(11.5%)", "Test-negative\n(88.5%)"), each = 2),
+              levels = c("Test-negative\n(88.5%)", "Diagnosed HIV\n(11.5%)"))
+part <- rep(c("Diagnosed HIV", "Test-negative"), times = 2)
+perc <- c(ss.table[2,2], ss.table[2,1],
+          ss.table[1,2], ss.table[1,1])
+ss.cc.df <- data.frame(ego, part, perc)
+rm(ego, part, perc, ss.table, cc.df)
+
+(ss.cc <- ggplot(ss.cc.df, aes(x = ego, y = perc, 
+                                   fill = factor(part, levels = c("Test-negative", "Diagnosed HIV")))) +
+                geom_bar(stat = "identity") +
+                scale_y_continuous(labels = scales::percent)) +
+        geom_label(aes(label = scales::percent(perc, accuracy = 0.1)), 
+                   position = position_stack(vjust = 0.5),
+                   show.legend = FALSE, fill = "white") +
+        labs(fill = "HIV among partners",
+             title = "Serosorting based on complete-case analysis",
+             x = "Respondents") +
+        theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+              axis.title.y = element_blank(),
+              text = element_text(size = 12),
+              strip.text = element_text(size = 12),
+              legend.position = "bottom") +
+        scale_fill_manual(values = mycol.ss.cc)
+
+## Reclassification Analysis
+ss.table <- as.data.frame(results(dat = reclass.results, x = "hh.sort.p"))
+ego <- factor(rep(c("Diagnosed HIV\n(11.2%)", "Test-negative or HIV unknown\n(88.8%)"), each = 2),
+              levels = c("Test-negative or HIV unknown\n(88.8%)", "Diagnosed HIV\n(11.2%)"))
+part <- rep(c("Diagnosed HIV", "Test-negative or HIV unknown"), times = 2)
+perc <- c(ss.table[4,2], ss.table[2,2], ss.table[3,2], ss.table[1,2])
+ss.reclass.df <- data.frame(ego, part, perc)
+rm(ego, part, perc, ss.table)
+
+(ss.reclass <- ggplot(ss.reclass.df, aes(x = ego, y = perc, 
+                               fill = factor(part, levels = c("Test-negative or HIV unknown", "Diagnosed HIV")))) +
+                geom_bar(stat = "identity") +
+                scale_y_continuous(labels = scales::percent)) +
+        geom_label(aes(label = scales::percent(perc, accuracy = 0.1)), 
+                   position = position_stack(vjust = 0.5),
+                   show.legend = FALSE, fill = "white") +
+        labs(fill = "HIV among partners",
+             title = "Serosorting based on reclassification analysis",
+             x = "Respondents") +
+        theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+              axis.title.y = element_blank(),
+              text = element_text(size = 12),
+              strip.text = element_text(size = 12),
+              legend.position = "bottom") +
+        scale_fill_manual(values = mycol.ss.re)
 
 
-for (i in seq_along(1:300)) {
-        
-        glm.hiv[[i]] <- glm(p_hiv.imp ~ p_age.cat_imp + p_race.cat + city2,
-                            data = dfs[[i]],
-                            family = binomial(link = "logit"))
-        
-        dfs[[i]]$glm.hiv <- glm.hiv[[i]]$fitted.values
-        
-        marg.hiv[[i]]$race1 <- mean(dfs[[i]]$glm.hiv[dfs[[i]]$p_race.cat == "black"])
-        marg.hiv[[i]]$race2 <- mean(dfs[[i]]$glm.hiv[dfs[[i]]$p_race.cat == "hispanic"])
-        marg.hiv[[i]]$race3 <- mean(dfs[[i]]$glm.hiv[dfs[[i]]$p_race.cat == "other"])
-        marg.hiv[[i]]$race4 <- mean(dfs[[i]]$glm.hiv[dfs[[i]]$p_race.cat == "white"])
-        
-        marg.hiv[[i]]$age1 <- mean(dfs[[i]]$glm.hiv[dfs[[i]]$p_age.cat_imp == "15-24"])
-        marg.hiv[[i]]$age2 <- mean(dfs[[i]]$glm.hiv[dfs[[i]]$p_age.cat_imp == "25-34"])
-        marg.hiv[[i]]$age3 <- mean(dfs[[i]]$glm.hiv[dfs[[i]]$p_age.cat_imp == "35-44"])
-        marg.hiv[[i]]$age4 <- mean(dfs[[i]]$glm.hiv[dfs[[i]]$p_age.cat_imp == "45-54"])
-        marg.hiv[[i]]$age5 <- mean(dfs[[i]]$glm.hiv[dfs[[i]]$p_age.cat_imp == "55-65"])
-        marg.hiv[[i]]$age6 <- mean(dfs[[i]]$glm.hiv[dfs[[i]]$p_age.cat_imp == "66+"])
-        
-}
+## PrEP Sorting ----
 
-marg.hiv <- as.data.frame(
-        do.call(rbind, lapply(
-                marg.hiv, c, recursive=TRUE)))
+## Full Sample
+ps.table <- prop.table(table(artnetSort$hp, artnetSort$p_hp),1)
+ego <- factor(rep(c("Diagnosed HIV\n(11.2%)", "Test-negative, No PrEP\n(54.5%)", "Test-negative, PrEP\n(21.9%)", "HIV unknown\n(12.3%)"), each = 4),
+              levels = c("Test-negative, No PrEP\n(54.5%)", "Test-negative, PrEP\n(21.9%)", "Diagnosed HIV\n(11.2%)", "HIV unknown\n(12.3%)"))
+part <- rep(c("Diagnosed HIV", "No PrEP", "PrEP", "PrEP Unknown"), times = 4)
+perc <- c(ps.table[2,2], ps.table[2,1], ps.table[2,3], ps.table[2,4],
+          ps.table[1,2], ps.table[1,1], ps.table[1,3], ps.table[1,4],
+          ps.table[3,2], ps.table[3,1], ps.table[3,3], ps.table[3,4],
+          ps.table[4,2], ps.table[4,1], ps.table[4,3], ps.table[4,4])
+ps.full.df <- data.frame(ego, part, perc)
+rm(ego, part, perc, ps.table)
 
-summary(marg.hiv)
+(ps.full <- ggplot(ps.full.df, aes(x = ego, y = perc, 
+                fill = factor(part, levels = c("PrEP Unknown", "PrEP", "No PrEP", "Diagnosed HIV")))) +
+                geom_bar(stat = "identity") +
+                scale_y_continuous(labels = scales::percent)) +
+        geom_label(aes(label = scales::percent(perc, accuracy = 0.1)), 
+                   position = position_stack(vjust = 0.5),
+                   show.legend = FALSE, fill = "white") +
+        labs(fill = "HIV & PrEP among partners",
+             title = "HIV & PrEP sorting based on respondent knowledge",
+             x = "Respondents") +
+        theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+              axis.title.y = element_blank(),
+              text = element_text(size = 12),
+              strip.text = element_text(size = 12),
+              legend.position = "right") +
+        scale_fill_manual(values = mycol.ps.full)
 
-## Standardized HIV & PrEP Prevalence ---- 
+## Complete-case analysis
+cc.df <- artnetSort %>% filter(!p_hiv == "Unk" & !prep.during.part2 == "Unk" & !hiv3 == "Unk")
+ps.table <- prop.table(table(cc.df$hp, cc.df$p_hp),1)
+ego <- factor(rep(c("Diagnosed HIV\n(14.0%)", "Test-negative, No PrEP\n(60.2%)", "Test-negative, PrEP\n(25.8%)"), each = 3),
+              levels = c("Test-negative, No PrEP\n(60.2%)", "Test-negative, PrEP\n(25.8%)", "Diagnosed HIV\n(14.0%)"))
+part <- rep(c("Diagnosed HIV", "No PrEP", "PrEP"), times = 3)
+perc <- c(ps.table[2,2], ps.table[2,1], ps.table[2,3],
+          ps.table[1,2], ps.table[1,1], ps.table[1,3],
+          ps.table[3,2], ps.table[3,1], ps.table[3,3])
 
-## Standard Population
+ps.cc.df <- data.frame(ego, part, perc)
+rm(ego, part, perc, ps.table)
 
-# Single obs for each ego in sample pop
-IDs <- artnetSort %>% select(AMIS_ID) %>% unique()
-egos.stand <- left_join(IDs, artnet, by = "AMIS_ID")
+(ps.cc <- ggplot(ps.cc.df, aes(x = ego, y = perc, 
+                                   fill = factor(part, levels = c("PrEP", "No PrEP", "Diagnosed HIV")))) +
+                geom_bar(stat = "identity") +
+                scale_y_continuous(labels = scales::percent)) +
+        geom_label(aes(label = scales::percent(perc, accuracy = 0.1)), 
+                   position = position_stack(vjust = 0.5),
+                   show.legend = FALSE, fill = "white") +
+        labs(fill = "HIV & PrEP among partners",
+             title = "HIV & PrEP sorting based on complete-case analysis",
+             x = "Respondents") +
+        theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+              axis.title.y = element_blank(),
+              text = element_text(size = 12),
+              strip.text = element_text(size = 12),
+              legend.position = "right") +
+        scale_fill_manual(values = mycol.ps.cc)
 
-# prep_curr indicates PrEP use at time of survey
-egos.stand$prep_curr[egos.stand$hiv3 == 2] <- 0
-egos.stand$prep_curr[egos.stand$PREP_REVISED == 0] <- 0
-egos.stand$prep_curr[egos.stand$artnetPREP_CURRENT == 0] <- 0
-egos.stand$prep_curr[egos.stand$artnetPREP_CURRENT == 1] <- 1
+## Reclassification analysis
+ps.table <- as.data.frame(results(dat = reclass.results, x = "full.sort.p"))
+ego <- factor(rep(c("Diagnosed HIV\n(11.2%)", "No PrEP\n(66.9%)", "PrEP\n(21.9%)"), each = 3),
+              levels = c("No PrEP\n(66.9%)", "PrEP\n(21.9%)", "Diagnosed HIV\n(11.2%)"))
+part <- rep(c("Diagnosed HIV", "No PrEP", "PrEP"), times = 3)
+perc <- c(ps.table[5,2], ps.table[2,2], ps.table[8,2],
+          ps.table[4,2], ps.table[1,2], ps.table[7,2],
+          ps.table[6,2], ps.table[3,2], ps.table[9,2])
+ps.reclass.df <- data.frame(ego, part, perc)
+rm(ego, part, perc, ps.table)
 
-egos.stand$hiv.prep[egos.stand$hiv3 == 1] <- 1
-egos.stand$hiv.prep[egos.stand$prep_curr == 0] <- 0
-egos.stand$hiv.prep[egos.stand$prep_curr == 1] <- 2
+(ps.reclass <- ggplot(ps.reclass.df, aes(x = ego, y = perc, 
+                               fill = factor(part, levels = c("PrEP", "No PrEP", "Diagnosed HIV")))) +
+                geom_bar(stat = "identity") +
+                scale_y_continuous(labels = scales::percent)) +
+        geom_label(aes(label = scales::percent(perc, accuracy = 0.1)), 
+                   position = position_stack(vjust = 0.5),
+                   show.legend = FALSE, fill = "white") +
+        labs(fill = "HIV & PrEP among partners",
+             title = "HIV & PrEP sorting based on the reclassification analysis",
+             x = "Respondents") +
+        theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+              axis.title.y = element_blank(),
+              text = element_text(size = 12),
+              strip.text = element_text(size = 12),
+              legend.position = "right") +
+        scale_fill_manual(values = mycol3)
 
-egos.stand <- egos.stand %>% filter(!is.na(hiv.prep)) %>% #Removing N = 3 with Ever PrEP but skipped Current PrEP
-        select(AMIS_ID, hiv.prep, p_age.cat_imp = age.cat, p_race.cat = race.cat, city2) # Renaming variables to match partners
-
-# Subset for HIV -/?
-egos.stand2 <- egos.stand %>% filter(hiv.prep %in% c(0,2))
-
-## Standardization
-
-# dfs <- vector("list", 300)
-# for (i in seq_along(1:300)) {
-#         dfs[[i]] <- readRDS(paste("imp", i, ".rds", sep = ""))
-# }
-
-glm.hiv <- vector("list", 300)
-stand.hiv <- vector("double", 300)
-
-glm.prep <- vector("list", 300)
-stand.prep <- vector("double", 300)
-
-
-for (i in seq_along(1:300)) {
-        
-        # HIV
-        glm.hiv[[i]] <- glm(p_hiv.imp ~ p_age.cat_imp*p_race.cat + city2,
-                            data = dfs[[i]],
-                            family = binomial(link = "logit"))
-        
-        stand.hiv[i] <- mean(predict(glm.hiv[[i]], newdata = egos.stand, type = "response"))
-        
-        # PrEP
-        glm.prep[[i]] <- glm(prep.imp ~ p_age.cat_imp*p_race.cat + city2,
-                             data = dfs[[i]],
-                             family = binomial(link = "logit"))
-        
-        stand.prep[i] <- mean(predict(glm.prep[[i]], newdata = egos.stand2, type = "response"))
-        
-}
-
-summary(stand.hiv)
-prop.table(table(egos.stand$hiv.prep))
-
-summary(stand.prep)
-prop.table(table(egos.stand2$hiv.prep))

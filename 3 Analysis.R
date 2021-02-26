@@ -36,7 +36,7 @@ for (i in seq_along(1:300)) {
         reclass[[i]]$ehiv.pneg.n <- table(dfs[[i]]$hiv2[dfs[[i]]$p_hiv.imp == 0])
         reclass[[i]]$ehiv.pneg.p <- prop.table(table(dfs[[i]]$hiv2[dfs[[i]]$p_hiv.imp == 0]))
         
-        # HIV-PrEP sorting
+        # HIV-PrEP sorting (ego's HIV, partner's imputed PrEP)
         reclass[[i]]$hp.sort.n <- table(dfs[[i]]$hiv2, dfs[[i]]$prep.imp)
         reclass[[i]]$hp.sort.p <- prop.table(table(dfs[[i]]$hiv2, dfs[[i]]$prep.imp),1)
         
@@ -48,9 +48,28 @@ for (i in seq_along(1:300)) {
         reclass[[i]]$pp.sort.n <- table(dfs[[i]]$prep.during.ego2[dfs[[i]]$hiv2 == 0], dfs[[i]]$prep.imp[dfs[[i]]$hiv2 == 0])
         reclass[[i]]$pp.sort.p <- prop.table(table(dfs[[i]]$prep.during.ego2[dfs[[i]]$hiv2 == 0], dfs[[i]]$prep.imp[dfs[[i]]$hiv2 == 0]), 1)
         
-        # PrEP-HIV sorting
+        # PrEP-HIV sorting (ego's PrEP, partner's imputed HIV)
         reclass[[i]]$ph.sort.n <- table(dfs[[i]]$prep.during.ego2[dfs[[i]]$hiv2 == 0], dfs[[i]]$p_hiv.imp[dfs[[i]]$hiv2 == 0])
         reclass[[i]]$ph.sort.p <- prop.table(table(dfs[[i]]$prep.during.ego2[dfs[[i]]$hiv2 == 0], dfs[[i]]$p_hiv.imp[dfs[[i]]$hiv2 == 0]), 1)
+        
+        # Ego's HIV & PrEP combined (3 levels: HIV+, PrEP, No PrEP)
+        dfs[[i]] <- dfs[[i]] %>% mutate(
+                hp3 = ifelse(hp == "Pos", 1,
+                                   ifelse(hp == "PrEP", 2, 0)))
+        
+        # Partner's imputed HIV & PrEP combined (3 levels: HIV+, PrEP, No PrEP)
+        dfs[[i]] <- dfs[[i]] %>% mutate(
+                p_hp3.imp = ifelse(p_hiv.imp == 1, 1,
+                                  ifelse(prep.imp == 0, 0, 2)))
+        
+        # Imputed HIV and PrEP prevalence among partners
+        reclass[[i]]$p_hp3.imp.n <- table(dfs[[i]]$p_hp3.imp)
+        reclass[[i]]$p_hp3.imp.p <- prop.table(table(dfs[[i]]$p_hp3.imp),1)
+        
+        # Full mixing (HIV+, NP, PrEP) with imputed values
+        reclass[[i]]$full.sort.n <- table(dfs[[i]]$hp3, dfs[[i]]$p_hp3.imp)
+        reclass[[i]]$full.sort.p <- prop.table(table(dfs[[i]]$hp3, dfs[[i]]$p_hp3.imp),1)
+        
         
 }
 
@@ -95,6 +114,6 @@ results <- function(dat, x) {
 # results(dat = reclass.results, x = "pp.sort.p")
 
 # # PrEP-HIV sorting
-# results(dat = reclass.results, x = "ph.sort.n")
-# results(dat = reclass.results, x = "ph.sort.p")
+results(dat = reclass.results, x = "ph.sort.n")
+results(dat = reclass.results, x = "ph.sort.p")
 

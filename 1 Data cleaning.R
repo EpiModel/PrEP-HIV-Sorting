@@ -104,7 +104,7 @@ artnetLong$keep[which(is.na(artnetLong$p_race.cat))] <- 0
 
 ## Egos' PrEP during partnership, Ever == 1 & Never == 0, 0 for all HIV+ and HIV?
 artnetLong$keep[artnetLong$hiv3 == 0 & is.na(artnetLong$prep.ever.ego)] <- 0 # Egos were inadvertently not asked about PrEP
-artnetLong$keep[artnetLong$prep.ever.ego == 1 & !artnetLong$prep.during.ego%in% c(1,2,3)] <- 0 # Missing info on prep.during.ego
+artnetLong$keep[artnetLong$prep.ever.ego == 1 & !artnetLong$prep.during.ego %in% c(1,2,3)] <- 0 # Missing info on prep.during.ego
 
 artnetLong$prep.during.ego2[artnetLong$prep.ever.ego == 0] <- 0 # Never PrEP set to Never During Partnership (was NA)
 artnetLong$prep.during.ego2[artnetLong$prep.during.ego == 3] <- 0 # No PrEP during
@@ -158,7 +158,7 @@ artnetSort$ptype = factor(artnetSort$ptype,  labels = c("Main", "Casual", "Once"
 artnetSort$hiv2[artnetSort$hiv3 %in% c("Neg","Unk")] <- 0
 artnetSort$hiv2[artnetSort$hiv3 == "Pos"] <- 1
 
-# hiv and PrEP
+# HIV+, HIV?, No PrEP, & PrEP
 artnetSort$hp[artnetSort$hiv3 == "Pos"] <- "Pos"
 artnetSort$hp[artnetSort$hiv3 == "Unk"] <- "Unk"
 artnetSort$hp[artnetSort$hiv3 == "Neg" & artnetSort$prep.during.ego2 == "No"] <- "NoPrEP"
@@ -166,7 +166,13 @@ artnetSort$hp[artnetSort$hiv3 == "Neg" & artnetSort$prep.during.ego2 == "Yes"] <
 
 ### Partner level variables
 
-# p_hiv: 2 level (Neg == 0; Pos == 1; Unk == NA)
+# p_hiv2: 2 level (Neg == 0; Pos == 1; Unk == NA)
 artnetSort$p_hiv2 <- as.numeric(artnetSort$p_hiv)
 artnetSort$p_hiv2 = artnetSort$p_hiv2 - 1
 artnetSort$p_hiv2[artnetSort$p_hiv2 == 2] <- NA
+
+# HIV+, No PrEP, PrEP, & PrEP Unknown
+artnetSort <- artnetSort %>% mutate(
+        p_hp = ifelse(p_hiv == "Pos", "Pos",
+                      ifelse(prep.during.part2 == "No", "NoPrEP",
+                             ifelse(prep.during.part2 == "Yes", "PrEP", "UnkPrEP"))))
