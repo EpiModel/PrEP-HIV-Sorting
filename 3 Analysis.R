@@ -114,6 +114,6 @@ results <- function(dat, x) {
 # results(dat = reclass.results, x = "pp.sort.p")
 
 # # PrEP-HIV sorting
-results(dat = reclass.results, x = "ph.sort.n")
-results(dat = reclass.results, x = "ph.sort.p")
+# results(dat = reclass.results, x = "ph.sort.n")
+# results(dat = reclass.results, x = "ph.sort.p")
 
