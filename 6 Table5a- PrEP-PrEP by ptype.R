@@ -5,10 +5,10 @@
 
 rm(list = ls())
 
-artnetSort <- artnetSort %>% filter(ptype == "Main")
+artnetSort <- artnetSort %>% filter(ptype %in% c("Once"))
 
 t5.title <- vector("character", 9)
-t5.title[1] <- "Table 5a. HIV-PrEP Sorting - Persistent Partners"
+t5.title[1] <- "Table 5a. HIV-PrEP Sorting - One-time Partners"
 
 t5.colname.a <- vector("character", 9) 
 t5.colname.a[4] <- "Partners"
@@ -17,10 +17,10 @@ t5.colname.b <- c("", "Total, dyad-level", "", "No PrEP", "", "PrEP", "", "PrEP 
 t5.colname.c <- c("Respondents", "N", "Column %", "N", "Row %", "N", "Row %", "N", "Row %")
 
 # Whole sample - egos and partners are HIV -/?
-a <- artnetSort %>% filter(!p_hiv == "Pos", hiv2 == 0) %>% count(prep.during.ego2) %>% mutate(perc = round(100*n/sum(n), 1))
-b <- artnetSort %>% filter(!p_hiv == "Pos", hiv2 == 0, prep.during.ego2 == "No") %>% count(prep.during.part2) %>% mutate(perc = round(100*n/sum(n), 1))
-c <- artnetSort %>% filter(!p_hiv == "Pos", hiv2 == 0, prep.during.ego2 == "Yes") %>% count(prep.during.part2) %>% mutate(perc = round(100*n/sum(n), 1))
-d <- artnetSort %>% filter(!p_hiv == "Pos", hiv2 == 0) %>% count(prep.during.part2) %>% mutate(perc = round(100*n/sum(n), 1))
+a <- artnetSort %>% filter(!p_hiv == "Pos", hiv3 == "Neg") %>% count(prep.during.ego2) %>% mutate(perc = round(100*n/sum(n), 1))
+b <- artnetSort %>% filter(!p_hiv == "Pos", hiv3 == "Neg", prep.during.ego2 == "No") %>% count(prep.during.part2) %>% mutate(perc = round(100*n/sum(n), 1))
+c <- artnetSort %>% filter(!p_hiv == "Pos", hiv3 == "Neg", prep.during.ego2 == "Yes") %>% count(prep.during.part2) %>% mutate(perc = round(100*n/sum(n), 1))
+d <- artnetSort %>% filter(!p_hiv == "Pos", hiv3 == "Neg") %>% count(prep.during.part2) %>% mutate(perc = round(100*n/sum(n), 1))
 
 t5.w <- rbind(
         cbind("Whole Sample", "", "", "", "", "", "", "", ""),
@@ -30,10 +30,10 @@ t5.w <- rbind(
         )        
 
 # Complete Case - partners are HIV negative and known PrEP use
-a <- artnetSort %>% filter(p_hiv == "Neg", !prep.during.part2 == "Unk", hiv2 == 0) %>% count(prep.during.ego2) %>% mutate(perc = round(100*n/sum(n), 1))
-b <- artnetSort %>% filter(p_hiv == "Neg", !prep.during.part2 == "Unk", hiv2 == 0, prep.during.ego2 == "No") %>% count(prep.during.part2) %>% mutate(perc = round(100*n/sum(n), 1))
-c <- artnetSort %>% filter(p_hiv == "Neg", !prep.during.part2 == "Unk", hiv2 == 0, prep.during.ego2 == "Yes") %>% count(prep.during.part2) %>% mutate(perc = round(100*n/sum(n), 1))
-d <- artnetSort %>% filter(p_hiv == "Neg", !prep.during.part2 == "Unk", hiv2 == 0) %>% count(prep.during.part2) %>% mutate(perc = round(100*n/sum(n), 1))
+a <- artnetSort %>% filter(p_hiv == "Neg", !prep.during.part2 == "Unk", hiv3 == "Neg") %>% count(prep.during.ego2) %>% mutate(perc = round(100*n/sum(n), 1))
+b <- artnetSort %>% filter(p_hiv == "Neg", !prep.during.part2 == "Unk", hiv3 == "Neg", prep.during.ego2 == "No") %>% count(prep.during.part2) %>% mutate(perc = round(100*n/sum(n), 1))
+c <- artnetSort %>% filter(p_hiv == "Neg", !prep.during.part2 == "Unk", hiv3 == "Neg", prep.during.ego2 == "Yes") %>% count(prep.during.part2) %>% mutate(perc = round(100*n/sum(n), 1))
+d <- artnetSort %>% filter(p_hiv == "Neg", !prep.during.part2 == "Unk", hiv3 == "Neg") %>% count(prep.during.part2) %>% mutate(perc = round(100*n/sum(n), 1))
 
 t5.c <- rbind(
         cbind("Complete-case", "", "", "", "", "", "", "", ""),
@@ -66,4 +66,4 @@ t5.r <- rbind(
 
 table5 <- rbind(t5.title, t5.colname.a, t5.colname.b, t5.colname.c, t5.w, t5.c, t5.r)
 
-write.csv(table5, file = "aim1_table5a_PP_pers.csv")
+write.csv(table5, file = "aim1_table5a_PP_once.csv")

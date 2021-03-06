@@ -70,6 +70,15 @@ for (i in seq_along(1:300)) {
         reclass[[i]]$full.sort.n <- table(dfs[[i]]$hp3, dfs[[i]]$p_hp3.imp)
         reclass[[i]]$full.sort.p <- prop.table(table(dfs[[i]]$hp3, dfs[[i]]$p_hp3.imp),1)
         
+        ### Variables for results of reclassification
+        
+        #pi.hiv
+        reclass[[i]]$pi.hiv <- median(dfs[[i]]$star1.hiv)
+        
+        #pi.prep
+        reclass[[i]]$pi.prep <- median(dfs[[i]]$star1.prep, na.rm = TRUE)
+        
+        
         
 }
 
@@ -79,6 +88,7 @@ reclass.results <- as.data.frame(do.call(rbind, listVec))
 results <- function(dat, x) {
         q <- select(dat, starts_with(x))
         return(t(apply(q, 2, quantile, probs = c(0.025, 0.5, 0.975), na.rm = FALSE)))
+        #return(t(apply(q, 2, quantile, probs = c(0, 0.5, 1), na.rm = FALSE)))
 }
 
 # # HIV prevalence
@@ -117,3 +127,12 @@ results <- function(dat, x) {
 # results(dat = reclass.results, x = "ph.sort.n")
 # results(dat = reclass.results, x = "ph.sort.p")
 
+# Full mixing (HIV+, NP, PrEP) with imputed values
+results(dat = reclass.results, x = "full.sort.n")
+results(dat = reclass.results, x = "full.sort.p")
+
+# pi.hiv
+results(dat = reclass.results, x = "pi.hiv")
+
+# pi.prep
+results(dat = reclass.results, x = "pi.prep")

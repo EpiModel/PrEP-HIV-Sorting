@@ -13,7 +13,7 @@ reclass <- vector("list", 300)
 
 for (i in seq_along(1:300)) {
         
-        dfs[[i]] <- dfs[[i]] %>% filter(ptype == "Main" | ptype == "Casual")
+        dfs[[i]] <- dfs[[i]] %>% filter(ptype == "Once")
 
         dfs[[i]] <- dfs[[i]] %>% 
                 mutate(hiv.prep = ifelse(hiv2 == 1, 1, ifelse(prep.during.ego2 == "No",0,2)),
