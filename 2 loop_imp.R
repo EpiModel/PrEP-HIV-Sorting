@@ -129,8 +129,8 @@ for (i in seq_along(nsim)) {
         
         ## Random starting sens & spec
         rv.prep[[i]]$pi.prep <- median(imp.prep[[i]]$star1.prep)
-        rv.prep[[i]]$spec.no.prep <- runif(1, 1 - rv.prep[[i]]$pi.prep + 0.01, 1 - rv.prep[[i]]$pi.prep + 0.03)
-        rv.prep[[i]]$spec.unk.prep <- runif(1, rv.prep[[i]]$spec.no.prep, rv.prep[[i]]$spec.no.prep + 0.03)
+        rv.prep[[i]]$spec.no.prep <- runif(1, 1 - rv.prep[[i]]$pi.prep + 0.01, 1 - rv.prep[[i]]$pi.prep + 0.04)
+        rv.prep[[i]]$spec.unk.prep <- runif(1, rv.prep[[i]]$spec.no.prep, rv.prep[[i]]$spec.no.prep + 0.04)
 
         rv.prep[[i]]$spec.yes.prep <- 1 - rv.prep[[i]]$pi.prep
         rv.prep[[i]]$spec.add.casual.prep <- runif(1, 0, rv.prep[[i]]$pi.prep)
@@ -168,7 +168,7 @@ for (i in seq_along(nsim)) {
         ## q parameters
         imp.prep[[i]]$q.sens.prep <- log(imp.prep[[i]]$sens.prep/(1-imp.prep[[i]]$sens.prep)) - log(rv.prep[[i]]$pi.prep/(1-rv.prep[[i]]$pi.prep))
         
-        imp.prep[[i]]$q.sens.prep[imp.prep[[i]]$prep.during.part2 == "Yes"] <- 0.01
+        imp.prep[[i]]$q.sens.prep[imp.prep[[i]]$prep.during.part2 == "Yes"] <- runif(1, 0.01, 0.1)
 
         imp.prep[[i]]$q.spec.prep <- log(imp.prep[[i]]$spec.prep / (1 - imp.prep[[i]]$spec.prep)) + log(rv.prep[[i]]$pi.prep / (1 - rv.prep[[i]]$pi.prep))
         

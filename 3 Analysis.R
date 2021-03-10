@@ -68,7 +68,7 @@ for (i in seq_along(1:300)) {
         
         # Full mixing (HIV+, NP, PrEP) with imputed values
         reclass[[i]]$full.sort.n <- table(dfs[[i]]$hp3, dfs[[i]]$p_hp3.imp)
-        reclass[[i]]$full.sort.p <- prop.table(table(dfs[[i]]$hp3, dfs[[i]]$p_hp3.imp),1)
+        reclass[[i]]$full.sort.p <- prop.table(table(dfs[[1]]$hp3, dfs[[1]]$p_hp3.imp),1)
         
         ### Variables for results of reclassification
         
@@ -105,7 +105,7 @@ results <- function(dat, x) {
 # 
 # # PrEP prevalence among HIV -/?
 # results(dat = reclass.results, x = "prep.imp.n")
-# results(dat = reclass.results, x = "prep.imp.p")
+results(dat = reclass.results, x = "prep.imp.p")
 # 
 # # PrEP reclassification
 # results(dat = reclass.results, x = "prep.reclass.n")
