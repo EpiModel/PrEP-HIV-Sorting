@@ -5,7 +5,7 @@
 
 rm(list = ls())
 
-source('~/GitHub/PrEP-HIV-Sorting/1 Data cleaning.R')
+source('C:/Users/kmalon5/Documents/GitHub/PrEP-HIV-Sorting/1 Data cleaning.R')
 library("INLA")
 
 rm(artnet, artnetLong)
