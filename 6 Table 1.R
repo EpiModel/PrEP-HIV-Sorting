@@ -1,6 +1,4 @@
 # Table 1: Ego and dyad level characteristics
-# By Kevin Maloney (kevin.maloney@emory.edu)
-# 2020-11-30
 
 rm(list = ls())
 source('~/GitHub/PrEP-HIV-Sorting/1 Data cleaning.R')

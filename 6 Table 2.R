@@ -1,6 +1,4 @@
-# Table 2: Unadjusted mixing
-# By Kevin Maloney (kevin.maloney@emory.edu)
-# 2021-01-15
+# Table 2: Mixing with unknown values included
 
 # rm(list = ls())
 # source('~/GitHub/PrEP-HIV-Sorting/3 Analysis.R')
