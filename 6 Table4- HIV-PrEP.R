@@ -1,5 +1,7 @@
 # Table 4: HIV-PrEP Mixing
 # Required: ~/GitHub/PrEP-HIV-Sorting/Analysis.R
+# By Kevin Maloney (kevin.maloney@emory.edu)
+# 2020-11-19
 
 rm(list = ls())
 

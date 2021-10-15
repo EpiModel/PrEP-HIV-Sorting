@@ -1,4 +1,5 @@
 # Figures showing mixing patterns
+# By Kevin Maloney (kevin.maloney@emory.edu)
 # 2021-03-22
 
 library("tidyverse")
