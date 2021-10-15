@@ -1,5 +1,5 @@
 rm(list = ls())
-source('~/GitHub/PrEP-HIV-Sorting/1 Data cleaning.R')
+source('1 Data cleaning.R')
 
 
 # Compiling all reclassification dfs to a list
@@ -13,7 +13,9 @@ reclass <- vector("list", 300)
 
 for (i in seq_along(1:300)) {
         
-        dfs[[i]] <- dfs[[i]] %>% filter(ptype %in% c("Casual", "Main"))
+        dfs[[i]] <- dfs[[i]] %>% 
+                filter(ptype %in% c("Main", "Casual")) %>% 
+                filter(!city2 %in% c("zOther1", "zOther2", "zOther3", "zOther4", "zOther5", "zOther6", "zOther7", "zOther8", "zOther9"))
 
         dfs[[i]] <- dfs[[i]] %>% 
                 mutate(hiv.prep = ifelse(hiv2 == 1, 1, ifelse(prep.during.ego2 == "No",0,2)),

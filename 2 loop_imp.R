@@ -5,7 +5,11 @@
 
 rm(list = ls())
 
-source('C:/Users/kmalon5/Documents/GitHub/PrEP-HIV-Sorting/1 Data cleaning.R')
+source('1 Data cleaning.R')
+
+# need to install INLA and load outside of renv -- might be a way to include in lockfile, but I don't know
+# https://www.r-inla.org/download-install
+# install.packages("INLA",repos=c(getOption("repos"),INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
 library("INLA")
 
 rm(artnet, artnetLong)

@@ -1,5 +1,5 @@
 rm(list = ls())
-source('~/GitHub/PrEP-HIV-Sorting/1 Data cleaning.R')
+source('1 Data cleaning.R')
 
 
 # Compiling all reclassification dfs to a list
