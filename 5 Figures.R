@@ -59,7 +59,7 @@ fig1.panels <- function(scen){
                 scale_x_discrete(expand = c(0,0)) +
                 geom_label(data = subset(ss.df, perc > 0),
                            aes(label = scales::percent(perc, accuracy = 0.1)), 
-                           position = position_stack(vjust = 0.5),
+                           position = position_stack(vjust = 0.5), size = 5.5,
                            show.legend = FALSE, fill = "white") +
                 labs(fill = "Alter HIV Status",
                      title = panel.title,
@@ -153,7 +153,7 @@ fig2.panels <- function(scen){
                 scale_x_discrete(expand = c(0,0)) +
                 geom_label(data = subset(ps.df, perc > 0),
                            aes(label = scales::percent(perc, accuracy = 0.1)), 
-                           position = position_stack(vjust = 0.5),
+                           position = position_stack(vjust = 0.5), size = 5.5,
                            show.legend = FALSE, fill = "white") +
                 labs(fill = "Alter HIV Status and PrEP Use",
                      title = panel.title,
