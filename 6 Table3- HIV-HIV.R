@@ -1,11 +1,8 @@
 # Table 3: HIV-HIV Mixing
-# Required: ~/GitHub/PrEP-HIV-Sorting/Analysis.R
-# By Kevin Maloney (kevin.maloney@emory.edu)
-# 2020-11-18
 
 rm(list = ls())
 
-source('~/GitHub/PrEP-HIV-Sorting/3 Analysis.R')
+source('3 Analysis.R')
 
 t3.title <- vector("character", 9)
 t3.title[1] <- "Table 3. HIV-HIV Sorting"

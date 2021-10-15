@@ -1,6 +1,4 @@
 # Figures showing mixing patterns
-# By Kevin Maloney (kevin.maloney@emory.edu)
-# 2021-03-22
 
 library("tidyverse")
 library("ggpubr")
@@ -84,7 +82,9 @@ fig1.panels <- function(scen){
                                                  color = "black"),
                       strip.background = element_blank(),
                       panel.background = element_blank()) +
-                scale_fill_manual(values = c("black", "grey28", "grey77", "grey52"))
+                scale_fill_manual(values = c("grey28", mycol4[2], mycol4[1], mycol4[3]))
+                #scale_fill_manual(values = c("black", "grey28", "grey77", "grey52"))
+        
         
         if (scen == "full") {ss.full <<- fig1.panel}
         if (scen == "cc") {ss.cc <<- fig1.panel}
@@ -176,7 +176,8 @@ fig2.panels <- function(scen){
                                                  color = "black"),
                       strip.background = element_blank(),
                       panel.background = element_blank()) +
-                scale_fill_manual(values = c("black", "grey28", "grey77", "grey52"))
+                scale_fill_manual(values = c("grey28", mycol4[2], mycol4[1], mycol4[3]))
+                #scale_fill_manual(values = c("black", "grey28", "grey77", "grey52"))
         
         if (scen == "full") {ps.full <<- fig2.panel}
         if (scen == "cc") {ps.cc <<- fig2.panel}

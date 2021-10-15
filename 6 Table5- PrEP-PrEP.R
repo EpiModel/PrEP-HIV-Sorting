@@ -1,11 +1,8 @@
 # Table 5: PrEP-PrEP Mixing
-# Required: ~/GitHub/PrEP-HIV-Sorting/Analysis.R
-# By Kevin Maloney (kevin.maloney@emory.edu)
-# 2020-11-19
 
 rm(list = ls())
 
-source('~/GitHub/PrEP-HIV-Sorting/Analysis.R')
+source('3 Analysis.R')
 
 t5.title <- vector("character", 9)
 t5.title[1] <- "Table 5. HIV-PrEP Sorting"

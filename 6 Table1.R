@@ -1,9 +1,7 @@
 # Table 1: Ego and dyad level characteristics
-# By Kevin Maloney (kevin.maloney@emory.edu)
-# 2020-11-30
 
 rm(list = ls())
-source('~/GitHub/PrEP-HIV-Sorting/1 Data cleaning.R')
+source('1 Data cleaning.R')
 
 IDs <- artnetSort %>% select(AMIS_ID) %>% unique()
 t1_egos <- left_join(IDs, artnet, by = "AMIS_ID")

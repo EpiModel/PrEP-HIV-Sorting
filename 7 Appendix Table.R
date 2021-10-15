@@ -1,8 +1,6 @@
 # Appendix Table: Results of the reclassification analysis
-# By Kevin Maloney (kevin.maloney@emory.edu)
-# 2021-03-06
 
-source('~/GitHub/PrEP-HIV-Sorting/1 Data cleaning.R')
+source('1 Data cleaning.R')
 rm(artnet, artnetLong)
 
 ## Ego-reported values (HIV) ---

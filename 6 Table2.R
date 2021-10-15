@@ -1,10 +1,7 @@
-# Table 2: Unadjusted mixing
-# By Kevin Maloney (kevin.maloney@emory.edu)
-# 2021-01-15
+# Table 2: Mixing patterns with unknown values
 
 # rm(list = ls())
-# source('~/GitHub/PrEP-HIV-Sorting/3 Analysis.R')
-
+# source('3 Analysis.R')
 
 t2.title <- vector("character", 9)
 t2.title[1] <- "Table 2. HIV and PrEP mixing including unknown values"

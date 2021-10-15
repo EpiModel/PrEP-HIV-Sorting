@@ -1,7 +1,5 @@
 # Corrects bias due to misclassification and unknown values in egocentric data
 # Required: data cleaning.R
-# By Kevin Maloney (kevin.maloney@emory.edu)
-# 2021-02-24
 
 rm(list = ls())
 
